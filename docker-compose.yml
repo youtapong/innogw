@@ -3,6 +3,7 @@ version: '3.8'
 services:
   innogw-api:
     build: .
+    image: innogw-api
     container_name: innogw-api
     restart: always
     ports:
