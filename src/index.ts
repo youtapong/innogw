@@ -2,13 +2,8 @@ import { Elysia, t } from "elysia";
 import { swagger } from "@elysiajs/swagger";
 import { sql } from "./db";
 import { userRoutes } from "./routes/user";
-import { organizationRoutes } from "./routes/organization";
 import { ssoRoutes } from "./routes/sso";
 import { authPlugin } from "./middlewares/auth";
-import { packageRoutes } from "./routes/package";
-import { cameraRoutes } from "./routes/camera";
-import { incidentRoutes } from "./routes/incident";
-import { alertRoutes } from "./routes/alert";
 import { apiLogsRoutes } from "./routes/api_logs";
 import { custommerRoutes } from "./routes/custommer";
 import { issueRoutes } from "./routes/issue";
@@ -26,7 +21,7 @@ const app = new Elysia()
       },
       documentation: {
         info: {
-          title: "NT-CCTV API Documentation",
+          title: "innovation-Gateway",
           version: "1.0.0",
         },
         security: [
@@ -51,29 +46,19 @@ const app = new Elysia()
   .use(authPlugin)
   // 4. โหลด User CRUD API Routes (Protected)
   .use(userRoutes)
-  // 5. โหลด Organization CRUD API Routes (Protected)
-  .use(organizationRoutes)
-  // 6. โหลด Package CRUD API Routes (Protected)
-  .use(packageRoutes)
-  // 7. โหลด Camera CRUD API Routes (Protected)
-  .use(cameraRoutes)
-  // 8. โหลด AI Incident CRUD API Routes (Protected)
-  .use(incidentRoutes)
-  // 9. โหลด Alert Log CRUD API Routes (Protected)
-  .use(alertRoutes)
-  // 10. โหลด API Logs CRUD API Routes (Protected)
+  // 5. โหลด API Logs CRUD API Routes (Protected)
   .use(apiLogsRoutes)
-  // 11. โหลด Customer CRUD API Routes (Protected)
+  // 6. โหลด Customer CRUD API Routes (Protected)
   .use(custommerRoutes)
-  // 12. โหลด Issue CRUD API Routes (Protected)
+  // 7. โหลด Issue CRUD API Routes (Protected)
   .use(issueRoutes)
-  // 13. โหลด Order Items CRUD API Routes (Protected)
+  // 8. โหลด Order Items CRUD API Routes (Protected)
   .use(orderItemsRoutes)
-  // 14. โหลด Product Mapping CRUD API Routes (Protected)
+  // 9. โหลด Product Mapping CRUD API Routes (Protected)
   .use(productMappingRoutes)
-  // 15. โหลด Spatial Reference System CRUD API Routes (Protected)
+  // 10. โหลด Spatial Reference System CRUD API Routes (Protected)
   .use(spatialRefSysRoutes)
-  // 16. ตรวจสอบการเชื่อมต่อฐานข้อมูล (Protected)
+  // 11. ตรวจสอบการเชื่อมต่อฐานข้อมูล (Protected)
   .get("/db-status", async () => {
     try {
       const result = await sql`SELECT version(), now()`;

@@ -220,3 +220,36 @@ Standard PostGIS metadata table for spatial reference systems (coordinate system
 
 ### Constraints
 - `spatial_ref_sys_srid_check`: `CHECK (srid > 0 AND srid <= 998999)`
+
+---
+
+## 7. Table: `user`
+Stores user/client accounts, authentication tokens, status, and profile information.
+
+### Columns
+| Column Name | Type | Nullable | Default | Description |
+| :--- | :--- | :---: | :--- | :--- |
+| `id` | `integer` | No | `nextval('user_id_seq'::regclass)` | Primary Key |
+| `image` | `text` | Yes | | Profile image link/base64 |
+| `username` | `character varying` | No | | Unique username for login |
+| `password` | `character varying` | No | | Account password |
+| `firstname` | `character varying(100)` | No | | User's first name |
+| `lastname` | `character varying(100)` | No | | User's last name |
+| `email` | `character varying(100)` | No | | User's email address |
+| `id_card` | `character varying(100)` | No | | National ID / Identification card |
+| `phone` | `character varying(20)` | No | | Phone number |
+| `address` | `text` | Yes | | Address |
+| `role` | `character varying(20)` | No | `'client'::character varying` | Role definition (e.g. `client`) |
+| `authorize_token` | `character varying(255)` | Yes | | Authentication token |
+| `remark` | `character varying` | Yes | | Remarks or notes |
+| `status` | `character varying(10)` | No | `'Active'::character varying` | Account status (`Active`, `Inactive`, etc.) |
+| `created` | `timestamp without time zone` | No | `now()` | Record creation timestamp |
+| `updated` | `timestamp without time zone` | No | `now()` | Record modification timestamp |
+
+### Indexes
+- `PK_cace4a159ff9f2512dd42373760` **PRIMARY KEY**, btree (`id`)
+- `UQ_78a916df40e02a9deb1c4b75edb` **UNIQUE**, btree (`username`)
+
+### Triggers
+- `trg_user_updated`: `BEFORE UPDATE ON public."user" FOR EACH ROW EXECUTE FUNCTION set_modify_time()`
+
