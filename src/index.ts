@@ -15,7 +15,8 @@ const app = new Elysia()
   .use(
     swagger({
       scalarConfig: {
-        theme: "deepSpace",
+        theme: "alternate",
+        darkMode: true,
       },
       documentation: {
         info: {
