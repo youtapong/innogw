@@ -9,6 +9,12 @@ import { packageRoutes } from "./routes/package";
 import { cameraRoutes } from "./routes/camera";
 import { incidentRoutes } from "./routes/incident";
 import { alertRoutes } from "./routes/alert";
+import { apiLogsRoutes } from "./routes/api_logs";
+import { custommerRoutes } from "./routes/custommer";
+import { issueRoutes } from "./routes/issue";
+import { orderItemsRoutes } from "./routes/order_items";
+import { productMappingRoutes } from "./routes/product_mapping";
+import { spatialRefSysRoutes } from "./routes/spatial_ref_sys";
 
 const app = new Elysia()
   // 1. เรียกใช้งาน Swagger plugin
@@ -55,7 +61,19 @@ const app = new Elysia()
   .use(incidentRoutes)
   // 9. โหลด Alert Log CRUD API Routes (Protected)
   .use(alertRoutes)
-  // 10. ตรวจสอบการเชื่อมต่อฐานข้อมูล (Protected)
+  // 10. โหลด API Logs CRUD API Routes (Protected)
+  .use(apiLogsRoutes)
+  // 11. โหลด Customer CRUD API Routes (Protected)
+  .use(custommerRoutes)
+  // 12. โหลด Issue CRUD API Routes (Protected)
+  .use(issueRoutes)
+  // 13. โหลด Order Items CRUD API Routes (Protected)
+  .use(orderItemsRoutes)
+  // 14. โหลด Product Mapping CRUD API Routes (Protected)
+  .use(productMappingRoutes)
+  // 15. โหลด Spatial Reference System CRUD API Routes (Protected)
+  .use(spatialRefSysRoutes)
+  // 16. ตรวจสอบการเชื่อมต่อฐานข้อมูล (Protected)
   .get("/db-status", async () => {
     try {
       const result = await sql`SELECT version(), now()`;
