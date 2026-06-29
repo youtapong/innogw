@@ -33,7 +33,8 @@ export const jodjewRoutes = new Elysia({ prefix: "/api/jodjew" })
   // 2. Foreground (Redirect success)
   .get(
     "/dev/success",
-    async ({ query }) => {
+    async ({ query, body }) => {
+      console.log("Jodjew dev/success received:", { query, body });
       return {
         status: "success",
         message: "Payment processed successfully via Jodjew",
@@ -51,7 +52,8 @@ export const jodjewRoutes = new Elysia({ prefix: "/api/jodjew" })
   // 3. Foreground (Redirect fail)
   .get(
     "/dev/fail",
-    async ({ query }) => {
+    async ({ query, body }) => {
+      console.log("Jodjew dev/fail received:", { query, body });
       return {
         status: "fail",
         message: "Payment failed via Jodjew",
@@ -69,7 +71,8 @@ export const jodjewRoutes = new Elysia({ prefix: "/api/jodjew" })
   // 4. Foreground (Redirect cancel)
   .get(
     "/dev/cancel",
-    async ({ query }) => {
+    async ({ query, body }) => {
+      console.log("Jodjew dev/cancel received:", { query, body });
       return {
         status: "cancel",
         message: "Payment cancelled by user",

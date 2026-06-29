@@ -33,7 +33,8 @@ export const aihubRoutes = new Elysia({ prefix: "/api/aihub" })
   // 2. Foreground (Redirect success)
   .get(
     "/dev/success",
-    async ({ query }) => {
+    async ({ query, body }) => {
+      console.log("AIHub dev/success received:", { query, body });
       return {
         status: "success",
         message: "Payment processed successfully via AIHub",
@@ -51,7 +52,8 @@ export const aihubRoutes = new Elysia({ prefix: "/api/aihub" })
   // 3. Foreground (Redirect fail)
   .get(
     "/dev/fail",
-    async ({ query }) => {
+    async ({ query, body }) => {
+      console.log("AIHub dev/fail received:", { query, body });
       return {
         status: "fail",
         message: "Payment failed via AIHub",
@@ -69,7 +71,8 @@ export const aihubRoutes = new Elysia({ prefix: "/api/aihub" })
   // 4. Foreground (Redirect cancel)
   .get(
     "/dev/cancel",
-    async ({ query }) => {
+    async ({ query, body }) => {
+      console.log("AIHub dev/cancel received:", { query, body });
       return {
         status: "cancel",
         message: "Payment cancelled by user",
