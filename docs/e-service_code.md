@@ -33,3 +33,24 @@ orderRef = "INN-service-runningnumber"
   "orderRef": "INN-01-0000000001"
 }
 ```
+
+---
+
+## วิธีการเข้ารหัส Signature (Signature Encryption Method)
+
+ในการรับ-ส่งข้อมูลชำระเงิน จะต้องมีตัวแปร `signature` แนบไปด้วย โดยมีวิธีการคำนวณและเข้ารหัสผ่านคำสั่ง (เช่น ในภาษา PHP) ดังนี้:
+
+### ตัวอย่างการเข้ารหัสในภาษา PHP:
+
+```php
+$signature = hash_hmac(
+    'sha256', 
+    $txKey .'|'. $order_ref .'|'. $total_unit .'|'. $total_price .'|'. $total_vat .'|'. $total_payment, 
+    false
+);
+```
+
+### คำอธิบายการทำงาน (Logic):
+- นำตัวแปร `$txKey` ต่อด้วยข้อมูลธุรกรรมต่างๆ คั่นด้วยเครื่องหมาย `|`
+- ทำการแฮชแบบ **HMAC-SHA256** โดยมี Key ในการเข้ารหัสเป็น `false` (หรือแปลงประเภทข้อมูลเป็นสตริงว่าง `""`)
+
