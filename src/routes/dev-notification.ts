@@ -2,7 +2,7 @@ import { Elysia, t } from "elysia";
 import { sql } from "../db";
 
 export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification" })
-  .onBeforeHandle(async ({ request, set }) => {
+  .onBeforeHandle(async ({ request, query, body, set }) => {
     const authHeader = request.headers.get("authorization");
     const token = authHeader && authHeader.startsWith("Bearer ")
       ? authHeader.slice(7)
@@ -13,32 +13,38 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
       const clientIp = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
       const requestId = request.headers.get("x-request-id") || "";
 
+      const orderRef = (body as any)?.orderRef || (body as any)?.order_ref || (query as any)?.orderRef || (query as any)?.order_ref || null;
+      const responseBody = { success: false, error: "Unauthorized: Invalid or missing dev key" };
+
       try {
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success, error_message, status_code)
-          VALUES ('dev-notification-auth-failed', ${JSON.stringify({ url: request.url, token_provided: token ? token.substring(0, 10) + "..." : null })}, ${clientIp}, ${requestId}, false, 'Unauthorized: Invalid or missing dev key', '401')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, error_message, status_code)
+          VALUES ('dev-notification-auth-failed', ${JSON.stringify({ url: request.url, token_provided: token ? token.substring(0, 10) + "..." : null })}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'Unauthorized: Invalid or missing dev key', '401')
         `;
       } catch (err) {
         console.error("Failed to log dev-notification auth error:", err);
       }
 
       set.status = 401;
-      return { success: false, error: "Unauthorized: Invalid or missing dev key" };
+      return responseBody;
     }
   })
   .post(
     "/",
-    async ({ body, request }) => {
+    async ({ body, query, request }) => {
       try {
         const clientIp = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
         const requestId = request.headers.get("x-request-id") || "";
 
+        const orderRef = (body as any)?.orderRef || (body as any)?.order_ref || (query as any)?.orderRef || (query as any)?.order_ref || null;
+        const responseBody = { success: true, message: "Notification callback POST received" };
+
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success)
-          VALUES ('dev-notification-callback-post', ${JSON.stringify(body)}, ${clientIp}, ${requestId}, true)
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success)
+          VALUES ('dev-notification-callback-post', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true)
         `;
 
-        return { success: true, message: "Notification callback POST received" };
+        return responseBody;
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -57,21 +63,24 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
       const clientIp = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
       const requestId = request.headers.get("x-request-id") || "";
 
+      const orderRef = (query as any)?.orderRef || (query as any)?.order_ref || null;
+      const responseBody = {
+        status: "success",
+        message: "Dev Notification query received",
+        transaction: query
+      };
+
       try {
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success)
-          VALUES ('dev-notification-get', ${JSON.stringify(query)}, ${clientIp}, ${requestId}, true)
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success)
+          VALUES ('dev-notification-get', ${JSON.stringify(query)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true)
         `;
       } catch (err) {
         console.error("Failed to log dev-notification get:", err);
       }
 
       console.log("Dev Notification GET received:", { query });
-      return {
-        status: "success",
-        message: "Dev Notification query received",
-        transaction: query
-      };
+      return responseBody;
     },
     {
       detail: {
@@ -82,17 +91,20 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
   )
   .patch(
     "/",
-    async ({ body, request }) => {
+    async ({ body, query, request }) => {
       try {
         const clientIp = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
         const requestId = request.headers.get("x-request-id") || "";
 
+        const orderRef = (body as any)?.orderRef || (body as any)?.order_ref || (query as any)?.orderRef || (query as any)?.order_ref || null;
+        const responseBody = { success: true, message: "Notification callback PATCH received" };
+
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success)
-          VALUES ('dev-notification-callback-patch', ${JSON.stringify(body)}, ${clientIp}, ${requestId}, true)
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success)
+          VALUES ('dev-notification-callback-patch', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true)
         `;
 
-        return { success: true, message: "Notification callback PATCH received" };
+        return responseBody;
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -107,17 +119,20 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
   )
   .delete(
     "/",
-    async ({ body, request }) => {
+    async ({ body, query, request }) => {
       try {
         const clientIp = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
         const requestId = request.headers.get("x-request-id") || "";
 
+        const orderRef = (body as any)?.orderRef || (body as any)?.order_ref || (query as any)?.orderRef || (query as any)?.order_ref || null;
+        const responseBody = { success: true, message: "Notification callback DELETE received" };
+
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success)
-          VALUES ('dev-notification-callback-delete', ${JSON.stringify(body)}, ${clientIp}, ${requestId}, true)
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success)
+          VALUES ('dev-notification-callback-delete', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true)
         `;
 
-        return { success: true, message: "Notification callback DELETE received" };
+        return responseBody;
       } catch (error: any) {
         return { success: false, error: error.message };
       }

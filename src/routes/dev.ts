@@ -2,7 +2,7 @@ import { Elysia, t } from "elysia";
 import { sql } from "../db";
 
 export const devRoutes = new Elysia({ prefix: "/api/dev" })
-  .onBeforeHandle(async ({ request, set }) => {
+  .onBeforeHandle(async ({ request, query, body, set }) => {
     const authHeader = request.headers.get("authorization");
     const token =
       authHeader && authHeader.startsWith("Bearer ")
@@ -17,26 +17,29 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         "unknown";
       const requestId = request.headers.get("x-request-id") || "";
 
+      const orderRef = (body as any)?.orderRef || (body as any)?.order_ref || (query as any)?.orderRef || (query as any)?.order_ref || null;
+      const responseBody = {
+        success: false,
+        error: "Unauthorized: Invalid or missing dev key",
+      };
+
       try {
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success, error_message, status_code)
-          VALUES ('dev-auth-failed', ${JSON.stringify({ url: request.url, token_provided: token ? token.substring(0, 10) + "..." : null })}, ${clientIp}, ${requestId}, false, 'Unauthorized: Invalid or missing dev key', '401')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, error_message, status_code)
+          VALUES ('dev-auth-failed', ${JSON.stringify({ url: request.url, token_provided: token ? token.substring(0, 10) + "..." : null })}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'Unauthorized: Invalid or missing dev key', '401')
         `;
       } catch (err) {
         console.error("Failed to log auth error:", err);
       }
 
       set.status = 401;
-      return {
-        success: false,
-        error: "Unauthorized: Invalid or missing dev key",
-      };
+      return responseBody;
     }
   })
   // ==================== SUCCESS ====================
   .post(
     "/success",
-    async ({ body, request }) => {
+    async ({ body, query, request }) => {
       try {
         const clientIp =
           request.headers.get("x-forwarded-for") ||
@@ -44,12 +47,15 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
           "unknown";
         const requestId = request.headers.get("x-request-id") || "";
 
+        const orderRef = (body as any)?.orderRef || (body as any)?.order_ref || (query as any)?.orderRef || (query as any)?.order_ref || null;
+        const responseBody = { success: true, message: "Callback success POST received" };
+
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-callback-success-post', ${JSON.stringify(body)}, ${clientIp}, ${requestId}, true, 'success')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
+          VALUES ('dev-callback-success-post', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, 'success')
         `;
 
-        return { success: true, message: "Callback success POST received" };
+        return responseBody;
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -71,21 +77,24 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         "unknown";
       const requestId = request.headers.get("x-request-id") || "";
 
+      const orderRef = (query as any)?.orderRef || (query as any)?.order_ref || null;
+      const responseBody = {
+        status: "success",
+        message: "Payment processed successfully via Dev",
+        transaction: query,
+      };
+
       try {
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-redirect-success-get', ${JSON.stringify(query)}, ${clientIp}, ${requestId}, true, 'success')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
+          VALUES ('dev-redirect-success-get', ${JSON.stringify(query)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, 'success')
         `;
       } catch (err) {
         console.error("Failed to log dev success get:", err);
       }
 
       console.log("Dev success GET received:", { query });
-      return {
-        status: "success",
-        message: "Payment processed successfully via Dev",
-        transaction: query,
-      };
+      return responseBody;
     },
     {
       detail: {
@@ -96,7 +105,7 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
   )
   .patch(
     "/success",
-    async ({ body, request }) => {
+    async ({ body, query, request }) => {
       try {
         const clientIp =
           request.headers.get("x-forwarded-for") ||
@@ -104,12 +113,15 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
           "unknown";
         const requestId = request.headers.get("x-request-id") || "";
 
+        const orderRef = (body as any)?.orderRef || (body as any)?.order_ref || (query as any)?.orderRef || (query as any)?.order_ref || null;
+        const responseBody = { success: true, message: "Callback success PATCH received" };
+
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-callback-success-patch', ${JSON.stringify(body)}, ${clientIp}, ${requestId}, true, 'success')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
+          VALUES ('dev-callback-success-patch', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, 'success')
         `;
 
-        return { success: true, message: "Callback success PATCH received" };
+        return responseBody;
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -124,7 +136,7 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
   )
   .delete(
     "/success",
-    async ({ body, request }) => {
+    async ({ body, query, request }) => {
       try {
         const clientIp =
           request.headers.get("x-forwarded-for") ||
@@ -132,12 +144,15 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
           "unknown";
         const requestId = request.headers.get("x-request-id") || "";
 
+        const orderRef = (body as any)?.orderRef || (body as any)?.order_ref || (query as any)?.orderRef || (query as any)?.order_ref || null;
+        const responseBody = { success: true, message: "Callback success DELETE received" };
+
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-callback-success-delete', ${JSON.stringify(body)}, ${clientIp}, ${requestId}, true, 'success')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
+          VALUES ('dev-callback-success-delete', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, 'success')
         `;
 
-        return { success: true, message: "Callback success DELETE received" };
+        return responseBody;
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -154,7 +169,7 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
   // ==================== FAIL ====================
   .post(
     "/fail",
-    async ({ body, request }) => {
+    async ({ body, query, request }) => {
       try {
         const clientIp =
           request.headers.get("x-forwarded-for") ||
@@ -162,12 +177,15 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
           "unknown";
         const requestId = request.headers.get("x-request-id") || "";
 
+        const orderRef = (body as any)?.orderRef || (body as any)?.order_ref || (query as any)?.orderRef || (query as any)?.order_ref || null;
+        const responseBody = { success: true, message: "Callback fail POST received" };
+
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-callback-fail-post', ${JSON.stringify(body)}, ${clientIp}, ${requestId}, false, 'fail')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
+          VALUES ('dev-callback-fail-post', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'fail')
         `;
 
-        return { success: true, message: "Callback fail POST received" };
+        return responseBody;
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -189,21 +207,24 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         "unknown";
       const requestId = request.headers.get("x-request-id") || "";
 
+      const orderRef = (query as any)?.orderRef || (query as any)?.order_ref || null;
+      const responseBody = {
+        status: "fail",
+        message: "Payment failed via Dev",
+        transaction: query,
+      };
+
       try {
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-redirect-fail-get', ${JSON.stringify(query)}, ${clientIp}, ${requestId}, false, 'fail')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
+          VALUES ('dev-redirect-fail-get', ${JSON.stringify(query)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'fail')
         `;
       } catch (err) {
         console.error("Failed to log dev fail get:", err);
       }
 
       console.log("Dev fail GET received:", { query });
-      return {
-        status: "fail",
-        message: "Payment failed via Dev",
-        transaction: query,
-      };
+      return responseBody;
     },
     {
       detail: {
@@ -214,7 +235,7 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
   )
   .patch(
     "/fail",
-    async ({ body, request }) => {
+    async ({ body, query, request }) => {
       try {
         const clientIp =
           request.headers.get("x-forwarded-for") ||
@@ -222,12 +243,15 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
           "unknown";
         const requestId = request.headers.get("x-request-id") || "";
 
+        const orderRef = (body as any)?.orderRef || (body as any)?.order_ref || (query as any)?.orderRef || (query as any)?.order_ref || null;
+        const responseBody = { success: true, message: "Callback fail PATCH received" };
+
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-callback-fail-patch', ${JSON.stringify(body)}, ${clientIp}, ${requestId}, false, 'fail')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
+          VALUES ('dev-callback-fail-patch', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'fail')
         `;
 
-        return { success: true, message: "Callback fail PATCH received" };
+        return responseBody;
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -242,7 +266,7 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
   )
   .delete(
     "/fail",
-    async ({ body, request }) => {
+    async ({ body, query, request }) => {
       try {
         const clientIp =
           request.headers.get("x-forwarded-for") ||
@@ -250,12 +274,15 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
           "unknown";
         const requestId = request.headers.get("x-request-id") || "";
 
+        const orderRef = (body as any)?.orderRef || (body as any)?.order_ref || (query as any)?.orderRef || (query as any)?.order_ref || null;
+        const responseBody = { success: true, message: "Callback fail DELETE received" };
+
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-callback-fail-delete', ${JSON.stringify(body)}, ${clientIp}, ${requestId}, false, 'fail')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
+          VALUES ('dev-callback-fail-delete', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'fail')
         `;
 
-        return { success: true, message: "Callback fail DELETE received" };
+        return responseBody;
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -272,7 +299,7 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
   // ==================== CANCEL ====================
   .post(
     "/cancel",
-    async ({ body, request }) => {
+    async ({ body, query, request }) => {
       try {
         const clientIp =
           request.headers.get("x-forwarded-for") ||
@@ -280,12 +307,15 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
           "unknown";
         const requestId = request.headers.get("x-request-id") || "";
 
+        const orderRef = (body as any)?.orderRef || (body as any)?.order_ref || (query as any)?.orderRef || (query as any)?.order_ref || null;
+        const responseBody = { success: true, message: "Callback cancel POST received" };
+
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-callback-cancel-post', ${JSON.stringify(body)}, ${clientIp}, ${requestId}, false, 'cancel')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
+          VALUES ('dev-callback-cancel-post', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'cancel')
         `;
 
-        return { success: true, message: "Callback cancel POST received" };
+        return responseBody;
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -307,21 +337,24 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         "unknown";
       const requestId = request.headers.get("x-request-id") || "";
 
+      const orderRef = (query as any)?.orderRef || (query as any)?.order_ref || null;
+      const responseBody = {
+        status: "cancel",
+        message: "Payment cancelled by user",
+        transaction: query,
+      };
+
       try {
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-redirect-cancel-get', ${JSON.stringify(query)}, ${clientIp}, ${requestId}, false, 'cancel')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
+          VALUES ('dev-redirect-cancel-get', ${JSON.stringify(query)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'cancel')
         `;
       } catch (err) {
         console.error("Failed to log dev cancel get:", err);
       }
 
       console.log("Dev cancel GET received:", { query });
-      return {
-        status: "cancel",
-        message: "Payment cancelled by user",
-        transaction: query,
-      };
+      return responseBody;
     },
     {
       detail: {
@@ -332,7 +365,7 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
   )
   .patch(
     "/cancel",
-    async ({ body, request }) => {
+    async ({ body, query, request }) => {
       try {
         const clientIp =
           request.headers.get("x-forwarded-for") ||
@@ -340,12 +373,15 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
           "unknown";
         const requestId = request.headers.get("x-request-id") || "";
 
+        const orderRef = (body as any)?.orderRef || (body as any)?.order_ref || (query as any)?.orderRef || (query as any)?.order_ref || null;
+        const responseBody = { success: true, message: "Callback cancel PATCH received" };
+
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-callback-cancel-patch', ${JSON.stringify(body)}, ${clientIp}, ${requestId}, false, 'cancel')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
+          VALUES ('dev-callback-cancel-patch', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'cancel')
         `;
 
-        return { success: true, message: "Callback cancel PATCH received" };
+        return responseBody;
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -360,7 +396,7 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
   )
   .delete(
     "/cancel",
-    async ({ body, request }) => {
+    async ({ body, query, request }) => {
       try {
         const clientIp =
           request.headers.get("x-forwarded-for") ||
@@ -368,12 +404,15 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
           "unknown";
         const requestId = request.headers.get("x-request-id") || "";
 
+        const orderRef = (body as any)?.orderRef || (body as any)?.order_ref || (query as any)?.orderRef || (query as any)?.order_ref || null;
+        const responseBody = { success: true, message: "Callback cancel DELETE received" };
+
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-callback-cancel-delete', ${JSON.stringify(body)}, ${clientIp}, ${requestId}, false, 'cancel')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
+          VALUES ('dev-callback-cancel-delete', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'cancel')
         `;
 
-        return { success: true, message: "Callback cancel DELETE received" };
+        return responseBody;
       } catch (error: any) {
         return { success: false, error: error.message };
       }
