@@ -10,8 +10,8 @@ import { issueRoutes } from "./routes/issue";
 import { orderItemsRoutes } from "./routes/order_items";
 import { productMappingRoutes } from "./routes/product_mapping";
 import { spatialRefSysRoutes } from "./routes/spatial_ref_sys";
-import { jodjewRoutes } from "./routes/jodjew";
-import { aihubRoutes } from "./routes/aihub";
+import { devRoutes } from "./routes/dev";
+import { devNotificationRoutes } from "./routes/dev-notification";
 
 const app = new Elysia()
   // 1. เรียกใช้งาน Swagger plugin
@@ -45,8 +45,8 @@ const app = new Elysia()
   // 2. โหลด Public SSO Login Routes (ไม่ต้องผ่าน Auth)
   .use(ssoRoutes)
   // 3. โหลด Public Payment Gateway Routes (ไม่ต้องผ่าน Auth)
-  .use(jodjewRoutes)
-  .use(aihubRoutes)
+  .use(devRoutes)
+  .use(devNotificationRoutes)
   // 4. โหลด Authentication Plugin (สิทธิ์เข้าใช้งานสำหรับทุก Route ด้านล่างนี้)
   .use(authPlugin)
   // 5. โหลด User CRUD API Routes (Protected)

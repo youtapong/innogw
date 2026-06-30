@@ -58,6 +58,7 @@ export const apiLogsRoutes = new Elysia({ prefix: "/api-logs" })
         const insertData = { ...body };
         if (insertData.request_body) insertData.request_body = JSON.stringify(insertData.request_body);
         if (insertData.response_body) insertData.response_body = JSON.stringify(insertData.response_body);
+        if (insertData.result_body) insertData.result_body = JSON.stringify(insertData.result_body);
 
         const allowedColumns = [
           "api_name",
@@ -68,7 +69,13 @@ export const apiLogsRoutes = new Elysia({ prefix: "/api-logs" })
           "response_body",
           "status_code",
           "is_success",
-          "error_message"
+          "error_message",
+          "status",
+          "result_body",
+          "transaction_ref",
+          "payment_status",
+          "payment_method",
+          "payment_method_name"
         ];
         const insertKeys = Object.keys(insertData).filter(
           (key) => insertData[key] !== undefined && allowedColumns.includes(key)
@@ -95,6 +102,12 @@ export const apiLogsRoutes = new Elysia({ prefix: "/api-logs" })
         status_code: t.Optional(t.String()),
         is_success: t.Optional(t.Boolean()),
         error_message: t.Optional(t.String()),
+        status: t.Optional(t.String()),
+        result_body: t.Optional(t.Any()),
+        transaction_ref: t.Optional(t.String()),
+        payment_status: t.Optional(t.String()),
+        payment_method: t.Optional(t.Integer()),
+        payment_method_name: t.Optional(t.String()),
       }),
       detail: {
         tags: ["API Logs"],
@@ -123,6 +136,12 @@ export const apiLogsRoutes = new Elysia({ prefix: "/api-logs" })
           status_code: body.status_code ?? null,
           is_success: body.is_success ?? null,
           error_message: body.error_message ?? null,
+          status: body.status ?? null,
+          result_body: body.result_body ? JSON.stringify(body.result_body) : null,
+          transaction_ref: body.transaction_ref ?? null,
+          payment_status: body.payment_status ?? null,
+          payment_method: body.payment_method ?? null,
+          payment_method_name: body.payment_method_name ?? null,
           modify_time: new Date()
         };
 
@@ -152,6 +171,12 @@ export const apiLogsRoutes = new Elysia({ prefix: "/api-logs" })
         status_code: t.Optional(t.Nullable(t.String())),
         is_success: t.Optional(t.Nullable(t.Boolean())),
         error_message: t.Optional(t.Nullable(t.String())),
+        status: t.Optional(t.Nullable(t.String())),
+        result_body: t.Optional(t.Nullable(t.Any())),
+        transaction_ref: t.Optional(t.Nullable(t.String())),
+        payment_status: t.Optional(t.Nullable(t.String())),
+        payment_method: t.Optional(t.Nullable(t.Integer())),
+        payment_method_name: t.Optional(t.Nullable(t.String())),
       }),
       detail: {
         tags: ["API Logs"],
@@ -173,6 +198,7 @@ export const apiLogsRoutes = new Elysia({ prefix: "/api-logs" })
         const updateData = { ...body, modify_time: new Date() };
         if (updateData.request_body) updateData.request_body = JSON.stringify(updateData.request_body);
         if (updateData.response_body) updateData.response_body = JSON.stringify(updateData.response_body);
+        if (updateData.result_body) updateData.result_body = JSON.stringify(updateData.result_body);
 
         const allowedColumns = [
           "api_name",
@@ -184,6 +210,12 @@ export const apiLogsRoutes = new Elysia({ prefix: "/api-logs" })
           "status_code",
           "is_success",
           "error_message",
+          "status",
+          "result_body",
+          "transaction_ref",
+          "payment_status",
+          "payment_method",
+          "payment_method_name",
           "modify_time"
         ];
         const updateKeys = Object.keys(updateData).filter(
@@ -220,6 +252,12 @@ export const apiLogsRoutes = new Elysia({ prefix: "/api-logs" })
         status_code: t.Optional(t.Nullable(t.String())),
         is_success: t.Optional(t.Nullable(t.Boolean())),
         error_message: t.Optional(t.Nullable(t.String())),
+        status: t.Optional(t.Nullable(t.String())),
+        result_body: t.Optional(t.Nullable(t.Any())),
+        transaction_ref: t.Optional(t.Nullable(t.String())),
+        payment_status: t.Optional(t.Nullable(t.String())),
+        payment_method: t.Optional(t.Nullable(t.Integer())),
+        payment_method_name: t.Optional(t.Nullable(t.String())),
       }),
       detail: {
         tags: ["API Logs"],
