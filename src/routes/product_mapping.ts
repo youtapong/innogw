@@ -1,5 +1,6 @@
 import { Elysia, t } from "elysia";
 import { sql } from "../db";
+import { product_token_encode } from "../utils/crypto";
 
 export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
   // 1. Get all product mappings
@@ -55,7 +56,9 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
     "/",
     async ({ body }) => {
       try {
-        const insertData = { ...body };
+        const token = product_token_encode(body.es_code);
+        const insertData = { ...body, product_token: token };
+
         const allowedColumns = [
           "es_code",
           "product_name",
@@ -99,7 +102,6 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
         ecc_product_name: t.Optional(t.String()),
         channel_product_code: t.Optional(t.String()),
         channel_service_code: t.String({ minLength: 1 }),
-        product_token: t.Optional(t.String()),
       }),
       detail: {
         tags: ["Product Mapping"],
@@ -118,6 +120,8 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
           return { success: false, error: "ไม่พบข้อมูลที่ต้องการอัปเดต" };
         }
 
+        const token = product_token_encode(body.es_code);
+
         const updateData = {
           es_code: body.es_code,
           product_name: body.product_name,
@@ -131,7 +135,7 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
           ecc_product_name: body.ecc_product_name ?? 'บริการด้านวิจัยและนวัตกรรม',
           channel_product_code: body.channel_product_code ?? 'SPC60001',
           channel_service_code: body.channel_service_code,
-          product_token: body.product_token ?? null,
+          product_token: token,
           modify_time: new Date()
         };
 
@@ -164,7 +168,6 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
         ecc_product_name: t.Optional(t.Nullable(t.String())),
         channel_product_code: t.Optional(t.Nullable(t.String())),
         channel_service_code: t.String({ minLength: 1 }),
-        product_token: t.Optional(t.Nullable(t.String())),
       }),
       detail: {
         tags: ["Product Mapping"],
@@ -178,12 +181,15 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
     "/:id",
     async ({ params: { id }, body }) => {
       try {
-        const [existing] = await sql`SELECT id FROM "product_mapping" WHERE id = ${id}`;
+        const [existing] = await sql`SELECT id, es_code FROM "product_mapping" WHERE id = ${id}`;
         if (!existing) {
           return { success: false, error: "ไม่พบข้อมูลที่ต้องการอัปเดต" };
         }
 
-        const updateData = { ...body, modify_time: new Date() };
+        const activeEsCode = body.es_code || existing.es_code;
+        const token = product_token_encode(activeEsCode);
+
+        const updateData = { ...body, product_token: token, modify_time: new Date() };
         const allowedColumns = [
           "es_code",
           "product_name",
@@ -237,11 +243,10 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
         ecc_product_name: t.Optional(t.Nullable(t.String())),
         channel_product_code: t.Optional(t.Nullable(t.String())),
         channel_service_code: t.Optional(t.String({ minLength: 1 })),
-        product_token: t.Optional(t.Nullable(t.String())),
       }),
       detail: {
         tags: ["Product Mapping"],
-        summary: "แก้ไขข้อมูลการจับคู่ผลิตภัณฑ์บางส่วนด้วย ID (Patch product mapping)",
+        summary: "อัปเดตข้อมูลการจับคู่ผลิตภัณฑ์บางส่วนด้วย ID (Patch product mapping)",
       },
     }
   )
@@ -251,13 +256,16 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
     "/:id",
     async ({ params: { id } }) => {
       try {
-        const [deleted] = await sql`
-          DELETE FROM "product_mapping" WHERE id = ${id} RETURNING id
-        `;
-        if (!deleted) {
+        const [existing] = await sql`SELECT id FROM "product_mapping" WHERE id = ${id}`;
+        if (!existing) {
           return { success: false, error: "ไม่พบข้อมูลที่ต้องการลบ" };
         }
-        return { success: true, message: `ลบข้อมูลการจับคู่ผลิตภัณฑ์ ID ${id} เรียบร้อยแล้ว` };
+
+        await sql`
+          DELETE FROM "product_mapping" WHERE id = ${id}
+        `;
+
+        return { success: true, message: "ลบข้อมูลการจับคู่ผลิตภัณฑ์เรียบร้อยแล้ว" };
       } catch (error: any) {
         return { success: false, error: error.message };
       }
