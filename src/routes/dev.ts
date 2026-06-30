@@ -2,7 +2,7 @@ import { Elysia, t } from "elysia";
 import { sql } from "../db";
 
 export const devRoutes = new Elysia({ prefix: "/api/dev" })
-  .onBeforeHandle(({ request, set }) => {
+  .onBeforeHandle(async ({ request, set }) => {
     const authHeader = request.headers.get("authorization");
     const token =
       authHeader && authHeader.startsWith("Bearer ")
@@ -11,6 +11,21 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
 
     const devKey = process.env.dev_key || process.env.DEV_KEY;
     if (!token || token !== devKey) {
+      const clientIp =
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown";
+      const requestId = request.headers.get("x-request-id") || "";
+
+      try {
+        await sql`
+          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success, error_message, status_code)
+          VALUES ('dev-auth-failed', ${JSON.stringify({ url: request.url, token_provided: token ? token.substring(0, 10) + "..." : null })}, ${clientIp}, ${requestId}, false, 'Unauthorized: Invalid or missing dev key', '401')
+        `;
+      } catch (err) {
+        console.error("Failed to log auth error:", err);
+      }
+
       set.status = 401;
       return {
         success: false,
@@ -49,7 +64,22 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
   )
   .get(
     "/success",
-    async ({ query }) => {
+    async ({ query, request }) => {
+      const clientIp =
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown";
+      const requestId = request.headers.get("x-request-id") || "";
+
+      try {
+        await sql`
+          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success, status)
+          VALUES ('dev-redirect-success-get', ${JSON.stringify(query)}, ${clientIp}, ${requestId}, true, 'success')
+        `;
+      } catch (err) {
+        console.error("Failed to log dev success get:", err);
+      }
+
       console.log("Dev success GET received:", { query });
       return {
         status: "success",
@@ -152,7 +182,22 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
   )
   .get(
     "/fail",
-    async ({ query }) => {
+    async ({ query, request }) => {
+      const clientIp =
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown";
+      const requestId = request.headers.get("x-request-id") || "";
+
+      try {
+        await sql`
+          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success, status)
+          VALUES ('dev-redirect-fail-get', ${JSON.stringify(query)}, ${clientIp}, ${requestId}, false, 'fail')
+        `;
+      } catch (err) {
+        console.error("Failed to log dev fail get:", err);
+      }
+
       console.log("Dev fail GET received:", { query });
       return {
         status: "fail",
@@ -255,7 +300,22 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
   )
   .get(
     "/cancel",
-    async ({ query }) => {
+    async ({ query, request }) => {
+      const clientIp =
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown";
+      const requestId = request.headers.get("x-request-id") || "";
+
+      try {
+        await sql`
+          INSERT INTO "api_logs" (api_name, request_body, x_client_ip, x_request_id, is_success, status)
+          VALUES ('dev-redirect-cancel-get', ${JSON.stringify(query)}, ${clientIp}, ${requestId}, false, 'cancel')
+        `;
+      } catch (err) {
+        console.error("Failed to log dev cancel get:", err);
+      }
+
       console.log("Dev cancel GET received:", { query });
       return {
         status: "cancel",
