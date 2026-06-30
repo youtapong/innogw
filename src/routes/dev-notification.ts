@@ -8,7 +8,7 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
       ? authHeader.slice(7)
       : authHeader;
 
-    const devKey = process.env.dev_key;
+    const devKey = process.env.dev_key || process.env.DEV_KEY;
     if (!token || token !== devKey) {
       set.status = 401;
       return { success: false, error: "Unauthorized: Invalid or missing dev key" };
