@@ -44,3 +44,6 @@ package-lock.json
 # local env files & user readme docs
 .env
 tong_readme.txt
+
+# docs directory
+/docs/
