@@ -40,8 +40,8 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
         const responseBody = { success: true, message: "Notification callback POST received" };
 
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success)
-          VALUES ('dev-notification-callback-post', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true)
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status_code)
+          VALUES ('dev-notification-callback-post', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, '200')
         `;
 
         return responseBody;
@@ -72,8 +72,8 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
 
       try {
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success)
-          VALUES ('dev-notification-get', ${JSON.stringify(query)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true)
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status_code)
+          VALUES ('dev-notification-get', ${JSON.stringify(query)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, '200')
         `;
       } catch (err) {
         console.error("Failed to log dev-notification get:", err);
@@ -100,8 +100,8 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
         const responseBody = { success: true, message: "Notification callback PATCH received" };
 
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success)
-          VALUES ('dev-notification-callback-patch', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true)
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status_code)
+          VALUES ('dev-notification-callback-patch', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, '200')
         `;
 
         return responseBody;
@@ -128,8 +128,8 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
         const responseBody = { success: true, message: "Notification callback DELETE received" };
 
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success)
-          VALUES ('dev-notification-callback-delete', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true)
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status_code)
+          VALUES ('dev-notification-callback-delete', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, '200')
         `;
 
         return responseBody;

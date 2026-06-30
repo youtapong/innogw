@@ -51,8 +51,8 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         const responseBody = { success: true, message: "Callback success POST received" };
 
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-callback-success-post', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, 'success')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status, status_code)
+          VALUES ('dev-callback-success-post', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, 'success', '200')
         `;
 
         return responseBody;
@@ -86,8 +86,8 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
 
       try {
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-redirect-success-get', ${JSON.stringify(query)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, 'success')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status, status_code)
+          VALUES ('dev-redirect-success-get', ${JSON.stringify(query)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, 'success', '200')
         `;
       } catch (err) {
         console.error("Failed to log dev success get:", err);
@@ -117,8 +117,8 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         const responseBody = { success: true, message: "Callback success PATCH received" };
 
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-callback-success-patch', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, 'success')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status, status_code)
+          VALUES ('dev-callback-success-patch', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, 'success', '200')
         `;
 
         return responseBody;
@@ -148,8 +148,8 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         const responseBody = { success: true, message: "Callback success DELETE received" };
 
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-callback-success-delete', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, 'success')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status, status_code)
+          VALUES ('dev-callback-success-delete', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, 'success', '200')
         `;
 
         return responseBody;
@@ -181,8 +181,8 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         const responseBody = { success: true, message: "Callback fail POST received" };
 
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-callback-fail-post', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'fail')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status, status_code)
+          VALUES ('dev-callback-fail-post', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'fail', '200')
         `;
 
         return responseBody;
@@ -216,8 +216,8 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
 
       try {
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-redirect-fail-get', ${JSON.stringify(query)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'fail')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status, status_code)
+          VALUES ('dev-redirect-fail-get', ${JSON.stringify(query)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'fail', '200')
         `;
       } catch (err) {
         console.error("Failed to log dev fail get:", err);
@@ -247,8 +247,8 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         const responseBody = { success: true, message: "Callback fail PATCH received" };
 
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-callback-fail-patch', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'fail')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status, status_code)
+          VALUES ('dev-callback-fail-patch', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'fail', '200')
         `;
 
         return responseBody;
@@ -278,8 +278,8 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         const responseBody = { success: true, message: "Callback fail DELETE received" };
 
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-callback-fail-delete', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'fail')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status, status_code)
+          VALUES ('dev-callback-fail-delete', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'fail', '200')
         `;
 
         return responseBody;
@@ -311,8 +311,8 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         const responseBody = { success: true, message: "Callback cancel POST received" };
 
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-callback-cancel-post', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'cancel')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status, status_code)
+          VALUES ('dev-callback-cancel-post', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'cancel', '200')
         `;
 
         return responseBody;
@@ -346,8 +346,8 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
 
       try {
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-redirect-cancel-get', ${JSON.stringify(query)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'cancel')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status, status_code)
+          VALUES ('dev-redirect-cancel-get', ${JSON.stringify(query)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'cancel', '200')
         `;
       } catch (err) {
         console.error("Failed to log dev cancel get:", err);
@@ -377,8 +377,8 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         const responseBody = { success: true, message: "Callback cancel PATCH received" };
 
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-callback-cancel-patch', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'cancel')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status, status_code)
+          VALUES ('dev-callback-cancel-patch', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'cancel', '200')
         `;
 
         return responseBody;
@@ -408,8 +408,8 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         const responseBody = { success: true, message: "Callback cancel DELETE received" };
 
         await sql`
-          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status)
-          VALUES ('dev-callback-cancel-delete', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'cancel')
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status, status_code)
+          VALUES ('dev-callback-cancel-delete', ${JSON.stringify(body)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'cancel', '200')
         `;
 
         return responseBody;
