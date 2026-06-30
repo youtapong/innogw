@@ -12,6 +12,8 @@ import { productMappingRoutes } from "./routes/product_mapping";
 import { spatialRefSysRoutes } from "./routes/spatial_ref_sys";
 import { devRoutes } from "./routes/dev";
 import { devNotificationRoutes } from "./routes/dev-notification";
+import { transactionRoutes } from "./routes/transaction-orderRef";
+
 
 const app = new Elysia()
   // 1. เรียกใช้งาน Swagger plugin
@@ -47,6 +49,7 @@ const app = new Elysia()
   // 3. โหลด Public Payment Gateway Routes (ไม่ต้องผ่าน Auth)
   .use(devRoutes)
   .use(devNotificationRoutes)
+  .use(transactionRoutes)
   // 4. โหลด Authentication Plugin (สิทธิ์เข้าใช้งานสำหรับทุก Route ด้านล่างนี้)
   .use(authPlugin)
   // 5. โหลด User CRUD API Routes (Protected)
