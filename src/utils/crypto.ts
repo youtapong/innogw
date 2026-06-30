@@ -18,11 +18,11 @@ export function signature(
   totalVat: number | string,
   totalPayment: number | string
 ): string {
-  // นำข้อมูลมาต่อกัน (Concatenate) ด้วยรูปแบบมาตรฐาน เช่น ต่อด้วยเครื่องหมาย |
-  const rawData = `${orderRef}|${totalUnit}|${totalPrice}|${totalVat}|${totalPayment}`;
+  // $txKey .'|'. $order_ref .'|'. $total_unit .'|'. $total_price .'|'. $total_vat .'|'. $total_payment
+  const rawData = `${txKey}|${orderRef}|${totalUnit}|${totalPrice}|${totalVat}|${totalPayment}`;
   
-  // เข้ารหัสด้วย HMAC-SHA256 โดยใช้ txKey เป็น Key
-  return createHmac("sha256", txKey)
+  // ใช้ key เป็น "" (เทียบเท่ากับ false ใน PHP hash_hmac)
+  return createHmac("sha256", "")
     .update(rawData)
     .digest("hex");
 }
