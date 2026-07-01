@@ -67,8 +67,8 @@ export const transactionRoutes = new Elysia({ prefix: "/transaction" })
           return responseBody;
         }
 
-        // Successfully authorized!
-        const reqEsCode = (body as any)?.esCode || "";
+        // Successfully authorized! Use esCode from decoded token to prevent foreign key violations
+        const reqEsCode = esCode;
         const reqInnoSub1 = (body as any)?.inno_sub1 !== undefined ? (body as any).inno_sub1 : 0;
         const reqInnoSub2 = (body as any)?.inno_sub2 !== undefined ? (body as any).inno_sub2 : 0;
         const paymentType = (body as any)?.payment_type || "dev";
