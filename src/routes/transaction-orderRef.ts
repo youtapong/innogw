@@ -53,7 +53,7 @@ export const transactionRoutes = new Elysia({ prefix: "/transaction" })
 
         // Check if token matches product_mapping.product_token where es_code = output(0)
         const [mapping] = await sql`
-          SELECT product_token FROM "product_mapping" WHERE es_code = ${esCode}
+          SELECT product_token, channel_product_code, channel_service_code FROM "product_mapping" WHERE es_code = ${esCode}
         `;
 
         if (!mapping || mapping.product_token !== token) {
@@ -102,8 +102,8 @@ export const transactionRoutes = new Elysia({ prefix: "/transaction" })
             ${reqEsCode},
             ${reqInnoSub1},
             ${reqInnoSub2},
-            '0',
-            '0',
+            ${mapping.channel_product_code || "0"},
+            ${mapping.channel_service_code || "0"},
             '0',
             '0',
             '0',
