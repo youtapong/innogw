@@ -36,6 +36,13 @@ export const transactionRoutes = new Elysia({ prefix: "/transaction" })
       }
 
       try {
+        const reqEsCode = (body as any)?.esCode || "";
+        if (!reqEsCode) {
+          set.status = 400;
+          const responseBody = { success: false, error: "Bad Request: Missing esCode in body" };
+          return responseBody;
+        }
+
         // Decode token
         const decodedArray = product_token_decode(token);
         if (!decodedArray || decodedArray.length < 1 || !decodedArray[0]) {
@@ -49,31 +56,30 @@ export const transactionRoutes = new Elysia({ prefix: "/transaction" })
           return responseBody;
         }
 
-        const esCode = decodedArray[0];
+        const tokenEsCode = decodedArray[0];
 
-        // Check if token matches product_mapping.product_token where es_code = output(0)
+        // Check if token matches product_mapping.product_token where es_code = reqEsCode
         const [mapping] = await sql`
-          SELECT product_token, channel_product_code, channel_service_code FROM "product_mapping" WHERE es_code = ${esCode}
+          SELECT product_token, channel_product_code, channel_service_code FROM "product_mapping" WHERE es_code = ${reqEsCode}
         `;
 
-        if (!mapping || mapping.product_token !== token) {
+        if (!mapping || mapping.product_token !== token || tokenEsCode !== reqEsCode) {
           set.status = 401;
-          const responseBody = { success: false, error: "Unauthorized: Token mismatch or not found" };
+          const responseBody = { success: false, error: "Unauthorized: Token mismatch or not found for the requested esCode" };
 
           await sql`
             INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, error_message, status_code)
-            VALUES ('transaction-orderRef-unauthorized', ${JSON.stringify(body || {})}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'Unauthorized: Token mismatch or not found', '401')
+            VALUES ('transaction-orderRef-unauthorized', ${JSON.stringify(body || {})}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'Unauthorized: Token mismatch or not found for the requested esCode', '401')
           `;
           return responseBody;
         }
 
-        // Successfully authorized! Use esCode from decoded token to prevent foreign key violations
-        const reqEsCode = esCode;
+        // Successfully authorized! Use verified reqEsCode from request body
         const reqInnoSub1 = (body as any)?.inno_sub1 !== undefined ? (body as any).inno_sub1 : 0;
         const reqInnoSub2 = (body as any)?.inno_sub2 !== undefined ? (body as any).inno_sub2 : 0;
         const paymentType = (body as any)?.payment_type !== undefined ? (body as any).payment_type : "dev";
 
-        console.log(`[transaction-orderRef] Authorized token for es_code: ${esCode}`);
+        console.log(`[transaction-orderRef] Authorized token for es_code: ${reqEsCode}`);
         console.log(`[transaction-orderRef] Request body data: esCode=${reqEsCode}, inno_sub1=${reqInnoSub1}, inno_sub2=${reqInnoSub2}, payment_type=${paymentType}`);
 
         // 1 ส่งข้อมูลไป @src/utils/crypto.ts function orderRef_create(esCode,inno_sub1,inno_sub2) ได้ค่า orderRef
