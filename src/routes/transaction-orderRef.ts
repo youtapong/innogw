@@ -71,7 +71,7 @@ export const transactionRoutes = new Elysia({ prefix: "/transaction" })
         const reqEsCode = esCode;
         const reqInnoSub1 = (body as any)?.inno_sub1 !== undefined ? (body as any).inno_sub1 : 0;
         const reqInnoSub2 = (body as any)?.inno_sub2 !== undefined ? (body as any).inno_sub2 : 0;
-        const paymentType = (body as any)?.payment_type || "dev";
+        const paymentType = (body as any)?.payment_type !== undefined ? (body as any).payment_type : "dev";
 
         console.log(`[transaction-orderRef] Authorized token for es_code: ${esCode}`);
         console.log(`[transaction-orderRef] Request body data: esCode=${reqEsCode}, inno_sub1=${reqInnoSub1}, inno_sub2=${reqInnoSub2}, payment_type=${paymentType}`);
