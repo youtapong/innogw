@@ -80,6 +80,9 @@ export const transactionRoutes = new Elysia({ prefix: "/transaction" })
         const newOrderRef = await orderRef_create(reqEsCode, reqInnoSub1, reqInnoSub2);
         console.log(`[transaction-orderRef] Generated new orderRef: ${newOrderRef}`);
 
+        // Map paymentType to integer: 0=dev, 1=prod
+        const paymentTypeInt = paymentType === "prod" || paymentType === 1 || paymentType === "1" ? 1 : 0;
+
         // 2. Insert to table orders order_ref= orderRef, inno_sub1, inno_sub2 , filed อื่น ถ้าไม่มีค่าอะไรใส่ 0 ไปก่อน
         console.log(`[transaction-orderRef] Inserting new order into "orders" table...`);
         await sql`
@@ -92,7 +95,8 @@ export const transactionRoutes = new Elysia({ prefix: "/transaction" })
             channel_service_code,
             document_type_code,
             tax_id_type,
-            mobile
+            mobile,
+            payment_type
           ) VALUES (
             ${newOrderRef},
             ${reqEsCode},
@@ -102,7 +106,8 @@ export const transactionRoutes = new Elysia({ prefix: "/transaction" })
             '0',
             '0',
             '0',
-            '0'
+            '0',
+            ${paymentTypeInt}
           )
         `;
         console.log(`[transaction-orderRef] Successfully inserted into "orders" table.`);
