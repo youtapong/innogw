@@ -72,7 +72,7 @@ export async function orderRef_create(
   // นำตัวแปร orderRef_check ไปหาค่า order_ref ที่ค่ามากที่สุด
   const result = await sql`
     SELECT order_ref 
-    FROM "order_items" 
+    FROM "orders" 
     WHERE order_ref LIKE ${`${orderRef_check}-%`}
     ORDER BY order_ref DESC 
     LIMIT 1
