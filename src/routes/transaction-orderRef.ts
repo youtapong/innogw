@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
 import { sql } from "../db";
-import { product_token_decode } from "../utils/crypto";
+import { product_token_decode, orderRef_create } from "../utils/crypto";
 
 export const transactionRoutes = new Elysia({ prefix: "/transaction" })
   .post(
@@ -68,19 +68,62 @@ export const transactionRoutes = new Elysia({ prefix: "/transaction" })
         }
 
         // Successfully authorized!
+        const reqEsCode = (body as any)?.esCode || "";
+        const reqInnoSub1 = (body as any)?.inno_sub1 !== undefined ? (body as any).inno_sub1 : 0;
+        const reqInnoSub2 = (body as any)?.inno_sub2 !== undefined ? (body as any).inno_sub2 : 0;
+        const paymentType = (body as any)?.payment_type || "dev";
+
+        console.log(`[transaction-orderRef] Authorized token for es_code: ${esCode}`);
+        console.log(`[transaction-orderRef] Request body data: esCode=${reqEsCode}, inno_sub1=${reqInnoSub1}, inno_sub2=${reqInnoSub2}, payment_type=${paymentType}`);
+
+        // 1 ส่งข้อมูลไป @src/utils/crypto.ts function orderRef_create(esCode,inno_sub1,inno_sub2) ได้ค่า orderRef
+        const newOrderRef = await orderRef_create(reqEsCode, reqInnoSub1, reqInnoSub2);
+        console.log(`[transaction-orderRef] Generated new orderRef: ${newOrderRef}`);
+
+        // 2. Insert to table orders order_ref= orderRef, inno_sub1, inno_sub2 , filed อื่น ถ้าไม่มีค่าอะไรใส่ 0 ไปก่อน
+        console.log(`[transaction-orderRef] Inserting new order into "orders" table...`);
+        await sql`
+          INSERT INTO "orders" (
+            order_ref,
+            es_code,
+            inno_sub1,
+            inno_sub2,
+            channel_product_code,
+            channel_service_code,
+            document_type_code,
+            tax_id_type,
+            mobile
+          ) VALUES (
+            ${newOrderRef},
+            ${reqEsCode},
+            ${reqInnoSub1},
+            ${reqInnoSub2},
+            '0',
+            '0',
+            '0',
+            '0',
+            '0'
+          )
+        `;
+        console.log(`[transaction-orderRef] Successfully inserted into "orders" table.`);
+
+        // 3. ส่งค่า เป็น json กลับไป
         const responseBody = {
-          success: true,
-          message: "Transaction authorized successfully",
-          es_code: esCode
+          status: "success",
+          payment_type: paymentType,
+          orderRef: newOrderRef
         };
+
+        console.log(`[transaction-orderRef] Response body:`, responseBody);
 
         await sql`
           INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status_code)
-          VALUES ('transaction-orderRef-success', ${JSON.stringify(body || {})}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, '200')
+          VALUES ('transaction-orderRef-success', ${JSON.stringify(body || {})}, ${JSON.stringify(responseBody)}, ${newOrderRef}, ${clientIp}, ${requestId}, true, '200')
         `;
 
         return responseBody;
       } catch (error: any) {
+        console.error(`[transaction-orderRef] Error encountered:`, error.message);
         set.status = 500;
         const responseBody = { success: false, error: error.message };
 
