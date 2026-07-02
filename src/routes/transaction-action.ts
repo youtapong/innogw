@@ -68,7 +68,7 @@ export const transactionActionRoutes = new Elysia({ prefix: "/transaction" })
           `;
           return responseBody;
         }
-        console.log(`[transaction-action] Step 2 complete. Found mapping for esCode: ${esCode}`);
+        console.log(`[transaction-action] Step 2 complete. Found mapping for esCode: ${esCode}`, JSON.stringify(mapping));
 
         // 3. ตรวจสอบ Authorization: Bearer token ที่ได้รับมา ถ้า token == product_token จึงจะทำงานต่อ
         console.log(`[transaction-action] Step 3: Verifying Bearer token...`);
@@ -189,7 +189,7 @@ export const transactionActionRoutes = new Elysia({ prefix: "/transaction" })
                 ${orderRef},
                 ${item.esCode || esCode},
                 ${mapping.hana_account_code || item.accountCode || "50412000"},
-                ${mapping.hana_product_code || item.productCode || "G0309"},
+                ${mapping.hana_product_code || item.productCode || "G03009"},
                 ${mapping.product_name || item.productName || ""},
                 ${item.model || ""},
                 ${item.companyCode || "NT"},
@@ -230,7 +230,7 @@ export const transactionActionRoutes = new Elysia({ prefix: "/transaction" })
           orderItems: (orderItems || []).map((item: any) => ({
             esCode: esCode,
             accountCode: mapping.ecc_account_code || "50412000",
-            productCode: mapping.ecc_product_code || "G0309",
+            productCode: mapping.ecc_product_code || "G03009",
             productName: mapping.ecc_product_name || "",
             model: item.model || "",
             companyCode: item.companyCode || "NT",
