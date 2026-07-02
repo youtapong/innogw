@@ -291,6 +291,34 @@ export const transactionActionRoutes = new Elysia({ prefix: "/transaction" })
         const fetchResult = await fetchResponse.json().catch(() => ({}));
         console.log(`[transaction-action] Step 8 complete. NT-Eservice response:`, fetchResult);
 
+        // 9. บันทึกข้อมูลการยิงข้อมูลชำระเงิน (Log to payment_logs)
+        console.log(`[transaction-action] Step 9: Logging to payment_logs...`);
+        const requestHeadersObj = {
+          "Content-Type": "application/json",
+          "X-ClientIp": clientIp,
+          "X-RequestId": requestId
+        };
+        await sql`
+          INSERT INTO "payment_logs" (
+            request_method,
+            request_url,
+            auth_token,
+            request_headers,
+            request_payload,
+            order_ref,
+            total_payment
+          ) VALUES (
+            'POST',
+            ${fetchUrl},
+            ${eserviceKey},
+            ${JSON.stringify(requestHeadersObj)},
+            ${JSON.stringify(eservicePayload)},
+            ${orderRef},
+            ${(body as any).totalPayment !== undefined ? Number((body as any).totalPayment) : 0.00}
+          )
+        `;
+        console.log(`[transaction-action] Step 9 complete. Logged to payment_logs.`);
+
         const responseBody = {
           success: true,
           status: "success",
@@ -298,13 +326,13 @@ export const transactionActionRoutes = new Elysia({ prefix: "/transaction" })
           eservice_response: fetchResult
         };
 
-        // 9. ทุกขั้นตอน console.log & บันทึกประวัติธุรกรรม (Log to api_logs)
-        console.log(`[transaction-action] Step 9: Writing success log to api_logs...`);
+        // 10. ทุกขั้นตอน console.log & บันทึกประวัติธุรกรรม (Log to api_logs)
+        console.log(`[transaction-action] Step 10: Writing success log to api_logs...`);
         await sql`
           INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status_code)
           VALUES ('transaction-action-success', ${JSON.stringify(body || {})}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, '200')
         `;
-        console.log(`[transaction-action] Step 9 complete. Processing successful.`);
+        console.log(`[transaction-action] Step 10 complete. Processing successful.`);
 
         return responseBody;
       } catch (error: any) {
