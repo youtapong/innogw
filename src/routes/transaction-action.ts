@@ -188,8 +188,8 @@ export const transactionActionRoutes = new Elysia({ prefix: "/transaction" })
               ) VALUES (
                 ${orderRef},
                 ${item.esCode || esCode},
-                ${mapping.hana_account_code || item.accountCode || "50412000"},
-                ${mapping.hana_product_code || item.productCode || "G03009"},
+                ${mapping.ecc_account_code || item.accountCode || "50412000"},
+                ${mapping.ecc_product_code || item.productCode || "G03009"},
                 ${mapping.product_name || item.productName || ""},
                 ${item.model || ""},
                 ${item.companyCode || "NT"},
