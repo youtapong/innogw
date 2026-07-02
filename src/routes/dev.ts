@@ -98,7 +98,7 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
           VALUES ('dev-redirect-success-get', ${JSON.stringify(query)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, 'success', '200')
         `;
 
-        console.log("Dev success GET received:", { query });
+        // console.log("Dev success GET received:", { query });
         return responseBody;
       } catch (error: any) {
         try {
@@ -260,7 +260,7 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
           VALUES ('dev-redirect-fail-get', ${JSON.stringify(query)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'fail', '200')
         `;
 
-        console.log("Dev fail GET received:", { query });
+        // console.log("Dev fail GET received:", { query });
         return responseBody;
       } catch (error: any) {
         try {
@@ -422,7 +422,7 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
           VALUES ('dev-redirect-cancel-get', ${JSON.stringify(query)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, false, 'cancel', '200')
         `;
 
-        console.log("Dev cancel GET received:", { query });
+        // console.log("Dev cancel GET received:", { query });
         return responseBody;
       } catch (error: any) {
         try {

@@ -84,7 +84,7 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
           VALUES ('dev-notification-get', ${JSON.stringify(query)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, '200')
         `;
 
-        console.log("Dev Notification GET received:", { query });
+        // console.log("Dev Notification GET received:", { query });
         return responseBody;
       } catch (error: any) {
         try {

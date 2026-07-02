@@ -19,9 +19,9 @@ export const transactionActionRoutes = new Elysia({
         ? (body as any).payment_type
         : 0;
 
-    console.log(
-      `[transaction-action] Starting processing for orderRef: ${orderRef}, payment_type: ${paymentType}`,
-    );
+    // console.log(
+//       `[transaction-action] Starting processing for orderRef: ${orderRef}, payment_type: ${paymentType}`,
+//     );
 
     // Extract authorization header
     const authHeader = headers["authorization"];
@@ -54,19 +54,19 @@ export const transactionActionRoutes = new Elysia({
       }
 
       // 1. นำ orderRef มาแยกโดยใช้เครื่องหมาย - แล้วใส่ array value
-      console.log(
-        `[transaction-action] Step 1: Splitting orderRef: ${orderRef}`,
-      );
+      // console.log(
+//         `[transaction-action] Step 1: Splitting orderRef: ${orderRef}`,
+//       );
       const parts = orderRef.split("-");
       const esCode = parts[0];
-      console.log(
-        `[transaction-action] Step 1 complete. Extracted esCode: ${esCode}`,
-      );
+      // console.log(
+//         `[transaction-action] Step 1 complete. Extracted esCode: ${esCode}`,
+//       );
 
       // 2. ค้นหาใน table product_mapping where es_code = value(0)
-      console.log(
-        `[transaction-action] Step 2: Querying product_mapping for es_code: ${esCode}`,
-      );
+      // console.log(
+//         `[transaction-action] Step 2: Querying product_mapping for es_code: ${esCode}`,
+//       );
       const [mapping] = await sql`
           SELECT product_token, product_name, channel_product_code, channel_service_code, 
                  hana_account_code, hana_product_code, 
@@ -87,13 +87,13 @@ export const transactionActionRoutes = new Elysia({
           `;
         return responseBody;
       }
-      console.log(
-        `[transaction-action] Step 2 complete. Found mapping for esCode: ${esCode}`,
-        JSON.stringify(mapping),
-      );
+      // console.log(
+//         `[transaction-action] Step 2 complete. Found mapping for esCode: ${esCode}`,
+//         JSON.stringify(mapping),
+//       );
 
       // 3. ตรวจสอบ Authorization: Bearer token ที่ได้รับมา ถ้า token == product_token จึงจะทำงานต่อ
-      console.log(`[transaction-action] Step 3: Verifying Bearer token...`);
+      // console.log(`[transaction-action] Step 3: Verifying Bearer token...`);
       if (token !== mapping.product_token) {
         set.status = 401;
         const responseBody = {
@@ -108,12 +108,12 @@ export const transactionActionRoutes = new Elysia({
           `;
         return responseBody;
       }
-      console.log(
-        `[transaction-action] Step 3 complete. Token successfully verified.`,
-      );
+      // console.log(
+//         `[transaction-action] Step 3 complete. Token successfully verified.`,
+//       );
 
       // 4. หาค่า "signature" จาก function @utils/crypto.ts
-      console.log(`[transaction-action] Step 4: Generating signature...`);
+      // console.log(`[transaction-action] Step 4: Generating signature...`);
       const txKey =
         paymentType === 1 || paymentType === "1"
           ? process.env.prod_txkey || process.env.PROD_TXKEY || ""
@@ -126,14 +126,14 @@ export const transactionActionRoutes = new Elysia({
         (body as any).totalVat || 0,
         (body as any).totalPayment || 0,
       );
-      console.log(
-        `[transaction-action] Step 4 complete. Generated signature: ${calculatedSignature}`,
-      );
+      // console.log(
+//         `[transaction-action] Step 4 complete. Generated signature: ${calculatedSignature}`,
+//       );
 
       // 5. ตรวจสอบและบันทึกข้อมูลลูกค้า (Check/Insert Customer)
-      console.log(
-        `[transaction-action] Step 5: Checking customer in custommer table...`,
-      );
+      // console.log(
+//         `[transaction-action] Step 5: Checking customer in custommer table...`,
+//       );
       const customerId = (body as any).customer_id || "";
       const [existingCustomer] = await sql`
           SELECT id FROM "custommer" WHERE es_code = ${esCode} AND customer_id = ${customerId}
@@ -142,9 +142,9 @@ export const transactionActionRoutes = new Elysia({
       let customerDbId: number;
       const etax = (body as any).etaxInvoice || {};
       if (!existingCustomer) {
-        console.log(
-          `[transaction-action] Step 5: Customer not found. Inserting new customer...`,
-        );
+        // console.log(
+//           `[transaction-action] Step 5: Customer not found. Inserting new customer...`,
+//         );
         const [inserted] = await sql`
             INSERT INTO "custommer" (
               es_code, customer_id, document_type_code, tax_id_type, national_id, business_id, branch_id,
@@ -161,13 +161,13 @@ export const transactionActionRoutes = new Elysia({
             ) RETURNING id
           `;
         customerDbId = inserted.id;
-        console.log(
-          `[transaction-action] Step 5 complete. Inserted new customer with ID: ${customerDbId}`,
-        );
+        // console.log(
+//           `[transaction-action] Step 5 complete. Inserted new customer with ID: ${customerDbId}`,
+//         );
       } else {
-        console.log(
-          `[transaction-action] Step 5: Customer found. Updating customer details with ID: ${existingCustomer.id}...`,
-        );
+        // console.log(
+//           `[transaction-action] Step 5: Customer found. Updating customer details with ID: ${existingCustomer.id}...`,
+//         );
         await sql`
             UPDATE "custommer" SET
               document_type_code = ${etax.documentTypeCode || ""},
@@ -194,15 +194,15 @@ export const transactionActionRoutes = new Elysia({
             WHERE id = ${existingCustomer.id}
           `;
         customerDbId = existingCustomer.id;
-        console.log(
-          `[transaction-action] Step 5 complete. Updated customer details.`,
-        );
+        // console.log(
+//           `[transaction-action] Step 5 complete. Updated customer details.`,
+//         );
       }
 
       // 6. Update ลง table orders where order_ref
-      console.log(
-        `[transaction-action] Step 6: Updating orders table for order_ref: ${orderRef}...`,
-      );
+      // console.log(
+//         `[transaction-action] Step 6: Updating orders table for order_ref: ${orderRef}...`,
+//       );
       await sql`
           UPDATE "orders" SET
             custommer_id = ${customerDbId},
@@ -216,14 +216,14 @@ export const transactionActionRoutes = new Elysia({
             modify_time = CURRENT_TIMESTAMP
           WHERE order_ref = ${orderRef}
         `;
-      console.log(
-        `[transaction-action] Step 6 complete. Updated orders table.`,
-      );
+      // console.log(
+//         `[transaction-action] Step 6 complete. Updated orders table.`,
+//       );
 
       // 7. Insert ลง table order_items
-      console.log(
-        `[transaction-action] Step 7: Inserting items into order_items...`,
-      );
+      // console.log(
+//         `[transaction-action] Step 7: Inserting items into order_items...`,
+//       );
       const orderItems = (body as any).orderItems;
       if (orderItems && Array.isArray(orderItems)) {
         for (const item of orderItems) {
@@ -256,14 +256,14 @@ export const transactionActionRoutes = new Elysia({
             `;
         }
       }
-      console.log(
-        `[transaction-action] Step 7 complete. Inserted all order items.`,
-      );
+      // console.log(
+//         `[transaction-action] Step 7 complete. Inserted all order items.`,
+//       );
 
       // 8. สร้าง curl เพื่อส่งข้อมูล โดยนำค่าที่ได้ มาเติมใน ข้อมูลที่ส่ง NT-Eservie
-      console.log(
-        `[transaction-action] Step 8: Preparing fetch payload for NT-Eservice...`,
-      );
+      // console.log(
+//         `[transaction-action] Step 8: Preparing fetch payload for NT-Eservice...`,
+//       );
       const eserviceUrl =
         paymentType === 1 || paymentType === "1"
           ? process.env.prod_url || process.env.PROD_URL || ""
@@ -329,9 +329,9 @@ export const transactionActionRoutes = new Elysia({
         },
       };
 
-      console.log(
-        `[transaction-action] Step 8: Sending POST request to ${fetchUrl}...`,
-      );
+      // console.log(
+//         `[transaction-action] Step 8: Sending POST request to ${fetchUrl}...`,
+//       );
       const fetchResponse = await fetch(fetchUrl, {
         method: "POST",
         headers: {
@@ -344,13 +344,13 @@ export const transactionActionRoutes = new Elysia({
       });
 
       const fetchResult = await fetchResponse.json().catch(() => ({}));
-      console.log(
-        `[transaction-action] Step 8 complete. NT-Eservice response:`,
-        fetchResult,
-      );
+      // console.log(
+//         `[transaction-action] Step 8 complete. NT-Eservice response:`,
+//         fetchResult,
+//       );
 
       // 9. บันทึกข้อมูลการยิงข้อมูลชำระเงิน (Log to payment_logs)
-      console.log(`[transaction-action] Step 9: Logging to payment_logs...`);
+      // console.log(`[transaction-action] Step 9: Logging to payment_logs...`);
       const requestHeadersObj = {
         "Content-Type": "application/json",
         "X-ClientIp": clientIp,
@@ -365,9 +365,9 @@ export const transactionActionRoutes = new Elysia({
 
       // 9. ส่งต่อข้อมูลไปยังธนาคารปลายทาง (Forward to bank_url)
       if (mapping.bank_url) {
-        console.log(
-          `[transaction-action] Step 9: Forwarding results to bank_url: ${mapping.bank_url}...`,
-        );
+        // console.log(
+//           `[transaction-action] Step 9: Forwarding results to bank_url: ${mapping.bank_url}...`,
+//         );
         try {
           const forwardResponse = await fetch(mapping.bank_url, {
             method: "POST",
@@ -379,9 +379,9 @@ export const transactionActionRoutes = new Elysia({
             body: JSON.stringify(responseBody),
           });
           const forwardResult = await forwardResponse.text();
-          console.log(
-            `[transaction-action] Step 9 complete. Forward response status: ${forwardResponse.status}, response body: ${forwardResult}`,
-          );
+          // console.log(
+//             `[transaction-action] Step 9 complete. Forward response status: ${forwardResponse.status}, response body: ${forwardResult}`,
+//           );
         } catch (forwardErr: any) {
           console.error(
             `[transaction-action] Step 9 failed. Failed to forward to bank_url:`,
@@ -389,13 +389,13 @@ export const transactionActionRoutes = new Elysia({
           );
         }
       } else {
-        console.log(
-          `[transaction-action] Step 9 skipped: bank_url is not configured.`,
-        );
+        // console.log(
+//           `[transaction-action] Step 9 skipped: bank_url is not configured.`,
+//         );
       }
 
       // 10. บันทึกข้อมูลการยิงข้อมูลชำระเงิน (Log to payment_logs)
-      console.log(`[transaction-action] Step 10: Logging to payment_logs...`);
+      // console.log(`[transaction-action] Step 10: Logging to payment_logs...`);
       await sql`
           INSERT INTO "payment_logs" (
             request_method,
@@ -415,21 +415,21 @@ export const transactionActionRoutes = new Elysia({
             ${(body as any).totalPayment !== undefined ? Number((body as any).totalPayment) : 0.0}
           )
         `;
-      console.log(
-        `[transaction-action] Step 10 complete. Logged to payment_logs.`,
-      );
+      // console.log(
+//         `[transaction-action] Step 10 complete. Logged to payment_logs.`,
+//       );
 
       // 11. ทุกขั้นตอน console.log & บันทึกประวัติธุรกรรม (Log to api_logs)
-      console.log(
-        `[transaction-action] Step 11: Writing success log to api_logs...`,
-      );
+      // console.log(
+//         `[transaction-action] Step 11: Writing success log to api_logs...`,
+//       );
       await sql`
           INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status_code)
           VALUES ('transaction-action-success', ${JSON.stringify(body || {})}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, '200')
         `;
-      console.log(
-        `[transaction-action] Step 11 complete. Processing successful.`,
-      );
+      // console.log(
+//         `[transaction-action] Step 11 complete. Processing successful.`,
+//       );
 
       return responseBody;
     } catch (error: any) {
