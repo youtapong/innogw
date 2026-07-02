@@ -13,6 +13,7 @@ import { spatialRefSysRoutes } from "./routes/spatial_ref_sys";
 import { devRoutes } from "./routes/dev";
 import { devNotificationRoutes } from "./routes/dev-notification";
 import { transactionRoutes } from "./routes/transaction-orderRef";
+import { transactionActionRoutes } from "./routes/transaction-action";
 
 
 const app = new Elysia()
@@ -50,6 +51,7 @@ const app = new Elysia()
   .use(devRoutes)
   .use(devNotificationRoutes)
   .use(transactionRoutes)
+  .use(transactionActionRoutes)
   // 4. โหลด Authentication Plugin (สิทธิ์เข้าใช้งานสำหรับทุก Route ด้านล่างนี้)
   .use(authPlugin)
   // 5. โหลด User CRUD API Routes (Protected)
