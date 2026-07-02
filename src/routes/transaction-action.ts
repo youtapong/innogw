@@ -52,7 +52,9 @@ export const transactionActionRoutes = new Elysia({ prefix: "/transaction" })
         // 2. ค้นหาใน table product_mapping where es_code = value(0)
         console.log(`[transaction-action] Step 2: Querying product_mapping for es_code: ${esCode}`);
         const [mapping] = await sql`
-          SELECT product_token, product_name, channel_product_code, channel_service_code, hana_account_code, hana_product_code 
+          SELECT product_token, product_name, channel_product_code, channel_service_code, 
+                 hana_account_code, hana_product_code, 
+                 ecc_account_code, ecc_product_code, ecc_product_name 
           FROM "product_mapping" 
           WHERE es_code = ${esCode}
         `;
@@ -227,9 +229,9 @@ export const transactionActionRoutes = new Elysia({ prefix: "/transaction" })
           orderRef2: "",
           orderItems: (orderItems || []).map((item: any) => ({
             esCode: esCode,
-            accountCode: mapping.hana_account_code || "50412000",
-            productCode: mapping.hana_product_code || "G0309",
-            productName: mapping.product_name || "",
+            accountCode: mapping.ecc_account_code || "50412000",
+            productCode: mapping.ecc_product_code || "G0309",
+            productName: mapping.ecc_product_name || "",
             model: item.model || "",
             companyCode: item.companyCode || "NT",
             homeCode: item.homeCode || "",
