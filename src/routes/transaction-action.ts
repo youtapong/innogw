@@ -84,7 +84,9 @@ export const transactionActionRoutes = new Elysia({ prefix: "/transaction" })
 
         // 4. หาค่า "signature" จาก function @utils/crypto.ts
         console.log(`[transaction-action] Step 4: Generating signature...`);
-        const txKey = paymentType === 1 || paymentType === "1" ? (process.env.prod_txkey || "") : (process.env.dev_txkey || "");
+        const txKey = paymentType === 1 || paymentType === "1"
+          ? (process.env.prod_txkey || process.env.PROD_TXKEY || "")
+          : (process.env.dev_txkey || process.env.DEV_TXKEY || "");
         const calculatedSignature = signature(
           txKey,
           orderRef,
@@ -209,8 +211,12 @@ export const transactionActionRoutes = new Elysia({ prefix: "/transaction" })
 
         // 8. สร้าง curl เพื่อส่งข้อมูล โดยนำค่าที่ได้ มาเติมใน ข้อมูลที่ส่ง NT-Eservie
         console.log(`[transaction-action] Step 8: Preparing fetch payload for NT-Eservice...`);
-        const eserviceUrl = paymentType === 1 || paymentType === "1" ? (process.env.prod_url || "") : (process.env.dev_url || "");
-        const eserviceKey = paymentType === 1 || paymentType === "1" ? (process.env.prod_key || "") : (process.env.dev_key || "");
+        const eserviceUrl = paymentType === 1 || paymentType === "1"
+          ? (process.env.prod_url || process.env.PROD_URL || "")
+          : (process.env.dev_url || process.env.DEV_URL || "");
+        const eserviceKey = paymentType === 1 || paymentType === "1"
+          ? (process.env.prod_key || process.env.PROD_KEY || "")
+          : (process.env.dev_key || process.env.DEV_KEY || "");
         const fetchUrl = `${eserviceUrl}/payments/otcpay/innovation`;
 
         const eservicePayload = {
