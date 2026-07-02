@@ -396,11 +396,6 @@ export const transactionActionRoutes = new Elysia({
 
       // 10. บันทึกข้อมูลการยิงข้อมูลชำระเงิน (Log to payment_logs)
       console.log(`[transaction-action] Step 10: Logging to payment_logs...`);
-      const requestHeadersObj = {
-        "Content-Type": "application/json",
-        "X-ClientIp": clientIp,
-        "X-RequestId": requestId,
-      };
       await sql`
           INSERT INTO "payment_logs" (
             request_method,
