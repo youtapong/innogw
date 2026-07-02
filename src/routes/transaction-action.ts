@@ -70,7 +70,7 @@ export const transactionActionRoutes = new Elysia({
       const [mapping] = await sql`
           SELECT product_token, product_name, channel_product_code, channel_service_code, 
                  hana_account_code, hana_product_code, 
-                 ecc_account_code, ecc_product_code, ecc_product_name 
+                 ecc_account_code, ecc_product_code, ecc_product_name, bank_url 
           FROM "product_mapping" 
           WHERE es_code = ${esCode}
         `;
@@ -356,6 +356,51 @@ export const transactionActionRoutes = new Elysia({
         "X-ClientIp": clientIp,
         "X-RequestId": requestId,
       };
+      const responseBody = {
+        success: true,
+        status: "success",
+        message: "Transaction processed successfully",
+        eservice_response: fetchResult,
+      };
+
+      // 9. ส่งต่อข้อมูลไปยังธนาคารปลายทาง (Forward to bank_url)
+      if (mapping.bank_url) {
+        console.log(
+          `[transaction-action] Step 9: Forwarding results to bank_url: ${mapping.bank_url}...`,
+        );
+        try {
+          const forwardResponse = await fetch(mapping.bank_url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-ClientIp": clientIp,
+              "X-RequestId": requestId,
+            },
+            body: JSON.stringify(responseBody),
+          });
+          const forwardResult = await forwardResponse.text();
+          console.log(
+            `[transaction-action] Step 9 complete. Forward response status: ${forwardResponse.status}, response body: ${forwardResult}`,
+          );
+        } catch (forwardErr: any) {
+          console.error(
+            `[transaction-action] Step 9 failed. Failed to forward to bank_url:`,
+            forwardErr.message,
+          );
+        }
+      } else {
+        console.log(
+          `[transaction-action] Step 9 skipped: bank_url is not configured.`,
+        );
+      }
+
+      // 10. บันทึกข้อมูลการยิงข้อมูลชำระเงิน (Log to payment_logs)
+      console.log(`[transaction-action] Step 10: Logging to payment_logs...`);
+      const requestHeadersObj = {
+        "Content-Type": "application/json",
+        "X-ClientIp": clientIp,
+        "X-RequestId": requestId,
+      };
       await sql`
           INSERT INTO "payment_logs" (
             request_method,
@@ -376,26 +421,19 @@ export const transactionActionRoutes = new Elysia({
           )
         `;
       console.log(
-        `[transaction-action] Step 9 complete. Logged to payment_logs.`,
+        `[transaction-action] Step 10 complete. Logged to payment_logs.`,
       );
 
-      const responseBody = {
-        success: true,
-        status: "success",
-        message: "Transaction processed successfully",
-        eservice_response: fetchResult,
-      };
-
-      // 10. ทุกขั้นตอน console.log & บันทึกประวัติธุรกรรม (Log to api_logs)
+      // 11. ทุกขั้นตอน console.log & บันทึกประวัติธุรกรรม (Log to api_logs)
       console.log(
-        `[transaction-action] Step 10: Writing success log to api_logs...`,
+        `[transaction-action] Step 11: Writing success log to api_logs...`,
       );
       await sql`
           INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status_code)
           VALUES ('transaction-action-success', ${JSON.stringify(body || {})}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, '200')
         `;
       console.log(
-        `[transaction-action] Step 10 complete. Processing successful.`,
+        `[transaction-action] Step 11 complete. Processing successful.`,
       );
 
       return responseBody;
