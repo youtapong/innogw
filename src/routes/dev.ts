@@ -17,10 +17,16 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         "unknown";
       const requestId = request.headers.get("x-request-id") || "";
 
-      const orderRef = (body as any)?.orderRef || (body as any)?.order_ref || (query as any)?.orderRef || (query as any)?.order_ref || null;
+      const orderRef =
+        (body as any)?.orderRef ||
+        (body as any)?.order_ref ||
+        (query as any)?.orderRef ||
+        (query as any)?.order_ref ||
+        null;
       const responseBody = {
         success: false,
         error: "Unauthorized: Invalid or missing dev key",
+        token: token || null,
       };
 
       try {
@@ -54,11 +60,17 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
       const orderRef = result.order_ref || null;
       const transactionRef = result.transaction_ref || null;
       const paymentStatus = result.payment_status || null;
-      const paymentMethod = result.payment_method !== undefined ? Number(result.payment_method) : null;
+      const paymentMethod =
+        result.payment_method !== undefined
+          ? Number(result.payment_method)
+          : null;
       const paymentMethodName = result.payment_method_name || null;
 
       try {
-        const responseBody = { success: true, message: "Callback success POST received and processed" };
+        const responseBody = {
+          success: true,
+          message: "Callback success POST received and processed",
+        };
 
         // 3. นำข้อมูล insert ลง ตาราง api_logs
         await sql`
@@ -129,14 +141,17 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json",
-                      "Authorization": `Bearer ${product_token || ""}`,
+                      Authorization: `Bearer ${product_token || ""}`,
                       "X-Client-Ip": clientIp,
                       "X-RequestId": requestId,
                     },
                     body: JSON.stringify(reqBody),
                   });
                 } catch (forwardErr: any) {
-                  console.error(`Failed to forward callback to message_url (${message_url}):`, forwardErr.message);
+                  console.error(
+                    `Failed to forward callback to message_url (${message_url}):`,
+                    forwardErr.message,
+                  );
                 }
               }
             }
@@ -192,7 +207,8 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         request.headers.get("x-real-ip") ||
         "unknown";
       const requestId = request.headers.get("x-request-id") || "";
-      const orderRef = (query as any)?.orderRef || (query as any)?.order_ref || null;
+      const orderRef =
+        (query as any)?.orderRef || (query as any)?.order_ref || null;
 
       try {
         const responseBody = {
@@ -228,7 +244,6 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
     },
   )
 
-
   // ==================== FAIL ====================
   .post(
     "/fail",
@@ -238,10 +253,18 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         request.headers.get("x-real-ip") ||
         "unknown";
       const requestId = request.headers.get("x-request-id") || "";
-      const orderRef = (body as any)?.orderRef || (body as any)?.order_ref || (query as any)?.orderRef || (query as any)?.order_ref || null;
+      const orderRef =
+        (body as any)?.orderRef ||
+        (body as any)?.order_ref ||
+        (query as any)?.orderRef ||
+        (query as any)?.order_ref ||
+        null;
 
       try {
-        const responseBody = { success: true, message: "Callback fail POST received" };
+        const responseBody = {
+          success: true,
+          message: "Callback fail POST received",
+        };
 
         await sql`
           INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status, status_code)
@@ -277,7 +300,8 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         request.headers.get("x-real-ip") ||
         "unknown";
       const requestId = request.headers.get("x-request-id") || "";
-      const orderRef = (query as any)?.orderRef || (query as any)?.order_ref || null;
+      const orderRef =
+        (query as any)?.orderRef || (query as any)?.order_ref || null;
 
       try {
         const responseBody = {
@@ -313,7 +337,6 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
     },
   )
 
-
   // ==================== CANCEL ====================
   .post(
     "/cancel",
@@ -323,10 +346,18 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         request.headers.get("x-real-ip") ||
         "unknown";
       const requestId = request.headers.get("x-request-id") || "";
-      const orderRef = (body as any)?.orderRef || (body as any)?.order_ref || (query as any)?.orderRef || (query as any)?.order_ref || null;
+      const orderRef =
+        (body as any)?.orderRef ||
+        (body as any)?.order_ref ||
+        (query as any)?.orderRef ||
+        (query as any)?.order_ref ||
+        null;
 
       try {
-        const responseBody = { success: true, message: "Callback cancel POST received" };
+        const responseBody = {
+          success: true,
+          message: "Callback cancel POST received",
+        };
 
         await sql`
           INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status, status_code)
@@ -362,7 +393,8 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         request.headers.get("x-real-ip") ||
         "unknown";
       const requestId = request.headers.get("x-request-id") || "";
-      const orderRef = (query as any)?.orderRef || (query as any)?.order_ref || null;
+      const orderRef =
+        (query as any)?.orderRef || (query as any)?.order_ref || null;
 
       try {
         const responseBody = {
