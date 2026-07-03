@@ -67,9 +67,66 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
       const paymentMethodName = result.payment_method_name || null;
 
       try {
+        let forwardedTo: string | null = null;
+
+        // 4. นำข้อมูล update ลง ตาราง orders
+        if (orderRef) {
+          await sql`
+            UPDATE "orders"
+            SET 
+              transaction_ref = ${transactionRef},
+              payment_status = ${paymentStatus},
+              payment_method = ${paymentMethod},
+              modify_time = CURRENT_TIMESTAMP
+            WHERE order_ref = ${orderRef}
+          `;
+
+          // 5. นำ order_ref มาตัด INNS10001-1-0-0000015 เหลือ INNS10001
+          const esCode = orderRef.split("-")[0];
+
+          if (esCode) {
+            // 6. หา URL , product_token ที่ได้จาก table product_mapping.message_url where es_code ='INNS10001'
+            const mappings = await sql`
+              SELECT message_url, product_token 
+              FROM "product_mapping" 
+              WHERE es_code = ${esCode}
+            `;
+
+            if (mappings.length > 0) {
+              const { message_url, product_token } = mappings[0];
+
+              // 7. ส่งต่อข้อมูลที่ได้รับ ไปที่ url และ product_token ตามที่ select ได้มา
+              if (message_url) {
+                forwardedTo = message_url;
+                try {
+                  await fetch(message_url, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${product_token || ""}`,
+                      "X-Client-Ip": clientIp,
+                      "X-RequestId": requestId,
+                    },
+                    body: JSON.stringify(reqBody),
+                  });
+                } catch (forwardErr: any) {
+                  console.error(
+                    `Failed to forward callback to message_url (${message_url}):`,
+                    forwardErr.message,
+                  );
+                }
+              }
+            }
+          }
+        }
+
         const responseBody = {
           success: true,
-          message: "Callback success POST received and processed",
+          message: forwardedTo 
+            ? `Callback success POST received and processed. Forwarded data to: ${forwardedTo}`
+            : "Callback success POST received and processed. No forwarding configured.",
+          data_received: reqBody,
+          forwarded_to: forwardedTo,
         };
 
         // 3. นำข้อมูล insert ลง ตาราง api_logs
@@ -107,56 +164,6 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
             ${paymentMethodName}
           )
         `;
-
-        // 4. นำข้อมูล update ลง ตาราง orders
-        if (orderRef) {
-          await sql`
-            UPDATE "orders"
-            SET 
-              transaction_ref = ${transactionRef},
-              payment_status = ${paymentStatus},
-              payment_method = ${paymentMethod},
-              modify_time = CURRENT_TIMESTAMP
-            WHERE order_ref = ${orderRef}
-          `;
-
-          // 5. นำ order_ref มาตัด INNS10001-1-0-0000015 เหลือ INNS10001
-          const esCode = orderRef.split("-")[0];
-
-          if (esCode) {
-            // 6. หา URL , product_token ที่ได้จาก table product_mapping.message_url where es_code ='INNS10001'
-            const mappings = await sql`
-              SELECT message_url, product_token 
-              FROM "product_mapping" 
-              WHERE es_code = ${esCode}
-            `;
-
-            if (mappings.length > 0) {
-              const { message_url, product_token } = mappings[0];
-
-              // 7. ส่งต่อข้อมูลที่ได้รับ ไปที่ url และ product_token ตามที่ select ได้มา
-              if (message_url) {
-                try {
-                  await fetch(message_url, {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                      Authorization: `Bearer ${product_token || ""}`,
-                      "X-Client-Ip": clientIp,
-                      "X-RequestId": requestId,
-                    },
-                    body: JSON.stringify(reqBody),
-                  });
-                } catch (forwardErr: any) {
-                  console.error(
-                    `Failed to forward callback to message_url (${message_url}):`,
-                    forwardErr.message,
-                  );
-                }
-              }
-            }
-          }
-        }
 
         return responseBody;
       } catch (error: any) {
