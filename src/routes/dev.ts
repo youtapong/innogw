@@ -9,8 +9,8 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         ? authHeader.slice(7)
         : authHeader;
 
-    const devKey = process.env.dev_accessKeyToken || process.env.DEV_ACCESS_KEY_TOKEN;
-    if (!token || token !== devKey) {
+    const messageToken = process.env.dev_messsageToken || process.env.DEV_MESSAGETOKEN;
+    if (!token || token !== messageToken) {
       const clientIp =
         request.headers.get("x-forwarded-for") ||
         request.headers.get("x-real-ip") ||
@@ -27,7 +27,7 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         success: false,
         error: "Unauthorized: Invalid or missing dev key",
         received_token: token || null,
-        expected_token: devKey || null,
+        expected_token: messageToken || null,
       };
 
       try {
