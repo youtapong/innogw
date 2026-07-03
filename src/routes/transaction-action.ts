@@ -338,7 +338,7 @@ export const transactionActionRoutes = new Elysia({
           "Content-Type": "application/json",
           Authorization: `Bearer ${eserviceKey}`,
           "X-ClientIp": clientIp,
-          "X-RequestId": requestId,
+          "X-RequestId": orderRef || "",
         },
         body: JSON.stringify(eservicePayload),
       });
@@ -354,7 +354,7 @@ export const transactionActionRoutes = new Elysia({
       const requestHeadersObj = {
         "Content-Type": "application/json",
         "X-ClientIp": clientIp,
-        "X-RequestId": requestId,
+        "X-RequestId": orderRef || "",
       };
       const responseBody = {
         success: true,
@@ -374,7 +374,7 @@ export const transactionActionRoutes = new Elysia({
             headers: {
               "Content-Type": "application/json",
               "X-ClientIp": clientIp,
-              "X-RequestId": requestId,
+              "X-RequestId": orderRef || "",
             },
             body: JSON.stringify(responseBody),
           });
