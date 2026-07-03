@@ -26,7 +26,8 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
       const responseBody = {
         success: false,
         error: "Unauthorized: Invalid or missing dev key",
-        token: token || null,
+        received_token: token || null,
+        expected_token: devKey || null,
       };
 
       try {
