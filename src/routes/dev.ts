@@ -9,7 +9,7 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         ? authHeader.slice(7)
         : authHeader;
 
-    const devKey = process.env.dev_key || process.env.DEV_KEY;
+    const devKey = process.env.dev_accessKeyToken || process.env.DEV_ACCESS_KEY_TOKEN;
     if (!token || token !== devKey) {
       const clientIp =
         request.headers.get("x-forwarded-for") ||
