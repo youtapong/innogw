@@ -56,6 +56,7 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
 
       try {
         let forwardedTo: string | null = null;
+        let eserviceResponse: any = null;
 
         // 4. นำข้อมูล update ลง ตาราง orders
         if (orderRef) {
@@ -87,7 +88,7 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
               if (bank_url) {
                 forwardedTo = bank_url;
                 try {
-                  await fetch(bank_url, {
+                  const forwardResponse = await fetch(bank_url, {
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json",
@@ -97,6 +98,7 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
                     },
                     body: JSON.stringify(reqBody),
                   });
+                  eserviceResponse = await forwardResponse.json().catch(() => ({}));
                 } catch (forwardErr: any) {
                   console.error(
                     `Failed to forward callback to bank_url (${bank_url}):`,
@@ -118,7 +120,13 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
         };
 
         const clientResponse = status === "success"
-          ? { statuscode: "200", status: "OK" }
+          ? {
+              success: true,
+              status: "ok",
+              statuscode: "200",
+              message: "Transaction processed successfully",
+              eservice_response: eserviceResponse || { errors: [], responses: {} }
+            }
           : responseBody;
 
         // 3. นำข้อมูล insert ลง ตาราง api_logs
