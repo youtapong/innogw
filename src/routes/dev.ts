@@ -45,7 +45,7 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
             const responseBody = {
               status: "redirect",
               message: "Redirecting client browser",
-              forwarded_to: redirectedTo,
+              forwarded_to: forwardedTo,
               redirect_url: redirectUrl,
             };
 
