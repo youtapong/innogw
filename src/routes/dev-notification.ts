@@ -117,6 +117,10 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
           forwarded_to: forwardedTo,
         };
 
+        const clientResponse = status === "success"
+          ? { statuscode: "200", status: "OK" }
+          : responseBody;
+
         // 3. นำข้อมูล insert ลง ตาราง api_logs
         await sql`
           INSERT INTO "api_logs" (
@@ -138,7 +142,7 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
           VALUES (
             'dev-notification-callback-post', 
             ${JSON.stringify(reqBody)}, 
-            ${JSON.stringify(responseBody)}, 
+            ${JSON.stringify(clientResponse)}, 
             ${orderRef}, 
             ${clientIp}, 
             ${requestId}, 
@@ -153,7 +157,7 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
           )
         `;
 
-        return responseBody;
+        return clientResponse;
       } catch (error: any) {
         try {
           await sql`
