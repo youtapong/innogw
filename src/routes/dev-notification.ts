@@ -73,21 +73,21 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
           const esCode = orderRef.split("-")[0];
 
           if (esCode) {
-            // 6. หา URL , product_token ที่ได้จาก table product_mapping.message_url where es_code ='INNS10001'
+            // 6. หา URL , product_token ที่ได้จาก table product_mapping.bank_url where es_code ='INNS10001'
             const mappings = await sql`
-              SELECT message_url, product_token 
+              SELECT bank_url, product_token 
               FROM "product_mapping" 
               WHERE es_code = ${esCode}
             `;
 
             if (mappings.length > 0) {
-              const { message_url, product_token } = mappings[0];
+              const { bank_url, product_token } = mappings[0];
 
               // 7. ส่งต่อข้อมูลที่ได้รับ ไปที่ url และ product_token ตามที่ select ได้มา
-              if (message_url) {
-                forwardedTo = message_url;
+              if (bank_url) {
+                forwardedTo = bank_url;
                 try {
-                  await fetch(message_url, {
+                  await fetch(bank_url, {
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json",
@@ -99,7 +99,7 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
                   });
                 } catch (forwardErr: any) {
                   console.error(
-                    `Failed to forward callback to message_url (${message_url}):`,
+                    `Failed to forward callback to bank_url (${bank_url}):`,
                     forwardErr.message,
                   );
                 }
