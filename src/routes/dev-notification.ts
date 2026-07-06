@@ -125,7 +125,17 @@ export const devNotificationRoutes = new Elysia({ prefix: "/api/dev/notification
               status: "ok",
               statuscode: "200",
               message: "Transaction processed successfully",
-              eservice_response: eserviceResponse || { errors: [], responses: {} }
+              eservice_response: (eserviceResponse && Object.keys(eserviceResponse).length > 0)
+                ? eserviceResponse
+                : {
+                    errors: [],
+                    responses: {
+                      data: {
+                        requestExNo: orderRef || "PO261190862",
+                        url: `https://uat2pay.nteservice.com/PaymentOtc/ipay/${orderRef || "PO261190862"}`
+                      }
+                    }
+                  }
             }
           : responseBody;
 
