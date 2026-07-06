@@ -5,9 +5,11 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
   // ==================== SUCCESS ====================
   .get(
     "/success",
-    async ({ query, set }) => {
+    async ({ query, set, request }) => {
       const orderRef = (query as any)?.orderRef || (query as any)?.order_ref || null;
       let forwardedTo = null;
+      const clientIp = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+      const requestId = request.headers.get("x-request-id") || "";
 
       if (orderRef) {
         const esCode = orderRef.split("-")[0];
@@ -40,6 +42,23 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
               console.error("Failed to forward GET callback:", err.message);
             }
 
+            const responseBody = {
+              status: "redirect",
+              message: "Redirecting client browser",
+              forwarded_to: redirectedTo,
+              redirect_url: redirectUrl,
+            };
+
+            // Log to api_logs
+            try {
+              await sql`
+                INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status_code)
+                VALUES ('dev-success-redirect', ${JSON.stringify(query)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, '302')
+              `;
+            } catch (dbErr) {
+              console.error("Failed to log dev-success redirect:", dbErr);
+            }
+
             // Redirect the client browser
             set.redirect = redirectUrl;
             return;
@@ -47,12 +66,24 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         }
       }
 
-      return {
+      const responseBody = {
         status: "success",
         message: "Payment processed successfully via Dev",
         transaction: query,
         forwarded_to: forwardedTo,
       };
+
+      // Log to api_logs
+      try {
+        await sql`
+          INSERT INTO "api_logs" (api_name, request_body, response_body, order_ref, x_client_ip, x_request_id, is_success, status_code)
+          VALUES ('dev-success', ${JSON.stringify(query)}, ${JSON.stringify(responseBody)}, ${orderRef}, ${clientIp}, ${requestId}, true, '200')
+        `;
+      } catch (dbErr) {
+        console.error("Failed to log dev-success:", dbErr);
+      }
+
+      return responseBody;
     },
     {
       detail: {
