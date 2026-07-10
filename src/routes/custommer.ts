@@ -23,13 +23,13 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
     },
   )
 
-  // 2. Get customer by ID
+  // 2. Get customer by es_code and customer_id
   .get(
-    "/:id",
-    async ({ params: { id } }) => {
+    "/:es_code/:customer_id",
+    async ({ params: { es_code, customer_id } }) => {
       try {
         const [customer] = await sql`
-          SELECT * FROM "custommer" WHERE id = ${id}
+          SELECT * FROM "custommer" WHERE es_code = ${es_code} AND customer_id = ${customer_id}
         `;
         if (!customer) {
           return { success: false, error: "ไม่พบข้อมูลลูกค้านี้" };
@@ -41,11 +41,12 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
     },
     {
       params: t.Object({
-        id: t.Numeric(),
+        es_code: t.String(),
+        customer_id: t.String(),
       }),
       detail: {
         tags: ["Customer"],
-        summary: "ดึงข้อมูลลูกค้าด้วย ID (Get customer by ID)",
+        summary: "ดึงข้อมูลลูกค้าด้วย es_code และ customer_id (Get customer)",
       },
     },
   )
