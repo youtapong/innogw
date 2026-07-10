@@ -8,7 +8,7 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
     async () => {
       try {
         const customers = await sql`
-          SELECT * FROM "custommer" ORDER BY custommer_id DESC
+          SELECT * FROM "custommer" ORDER BY id DESC
         `;
         return { success: true, data: customers };
       } catch (error: any) {
@@ -20,7 +20,7 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
         tags: ["Customer"],
         summary: "ดึงข้อมูลลูกค้าทั้งหมด (Get all customers)",
       },
-    }
+    },
   )
 
   // 2. Get customer by ID
@@ -29,7 +29,7 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
     async ({ params: { id } }) => {
       try {
         const [customer] = await sql`
-          SELECT * FROM "custommer" WHERE custommer_id = ${id}
+          SELECT * FROM "custommer" WHERE id = ${id}
         `;
         if (!customer) {
           return { success: false, error: "ไม่พบข้อมูลลูกค้านี้" };
@@ -47,7 +47,7 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
         tags: ["Customer"],
         summary: "ดึงข้อมูลลูกค้าด้วย ID (Get customer by ID)",
       },
-    }
+    },
   )
 
   // 3. Create a new customer
@@ -58,6 +58,7 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
         const insertData = { ...body };
         const allowedColumns = [
           "es_code",
+          "customer_id",
           "document_type_code",
           "tax_id_type",
           "national_id",
@@ -77,10 +78,11 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
           "district",
           "province",
           "zip_code",
-          "office_name"
+          "office_name",
         ];
         const insertKeys = Object.keys(insertData).filter(
-          (key) => insertData[key] !== undefined && allowedColumns.includes(key)
+          (key) =>
+            insertData[key] !== undefined && allowedColumns.includes(key),
         );
 
         const [newCustomer] = await sql`
@@ -96,6 +98,7 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
     {
       body: t.Object({
         es_code: t.String({ minLength: 1 }),
+        customer_id: t.String({ minLength: 1 }),
         document_type_code: t.String({ minLength: 1 }),
         tax_id_type: t.String({ minLength: 1 }),
         national_id: t.Optional(t.String()),
@@ -121,7 +124,7 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
         tags: ["Customer"],
         summary: "สร้างข้อมูลลูกค้าใหม่ (Create customer)",
       },
-    }
+    },
   )
 
   // 4. Update customer by ID (PUT - Full Update)
@@ -129,7 +132,8 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
     "/:id",
     async ({ params: { id }, body }) => {
       try {
-        const [existing] = await sql`SELECT custommer_id FROM "custommer" WHERE custommer_id = ${id}`;
+        const [existing] =
+          await sql`SELECT id FROM "custommer" WHERE id = ${id}`;
         if (!existing) {
           return { success: false, error: "ไม่พบข้อมูลลูกค้าที่ต้องการอัปเดต" };
         }
@@ -156,7 +160,7 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
           province: body.province ?? null,
           zip_code: body.zip_code ?? null,
           office_name: body.office_name ?? null,
-          modify_time: new Date()
+          modify_time: new Date(),
         };
 
         const [updated] = await sql`
@@ -202,22 +206,22 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
         tags: ["Customer"],
         summary: "อัปเดตข้อมูลลูกค้าทั้งหมดด้วย ID (Put customer)",
       },
-    }
+    },
   )
 
-  // 5. Update customer by ID (PATCH - Partial Update)
+  // 5. Update customer by es_code and customer_id (PATCH - Partial Update)
   .patch(
-    "/:id",
-    async ({ params: { id }, body }) => {
+    "/:es_code/:customer_id",
+    async ({ params: { es_code, customer_id }, body }) => {
       try {
-        const [existing] = await sql`SELECT custommer_id FROM "custommer" WHERE custommer_id = ${id}`;
+        const [existing] =
+          await sql`SELECT id FROM "custommer" WHERE es_code = ${es_code} AND customer_id = ${customer_id}`;
         if (!existing) {
           return { success: false, error: "ไม่พบข้อมูลลูกค้าที่ต้องการอัปเดต" };
         }
 
         const updateData = { ...body, modify_time: new Date() };
         const allowedColumns = [
-          "es_code",
           "document_type_code",
           "tax_id_type",
           "national_id",
@@ -238,10 +242,11 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
           "province",
           "zip_code",
           "office_name",
-          "modify_time"
+          "modify_time",
         ];
         const updateKeys = Object.keys(updateData).filter(
-          (key) => updateData[key] !== undefined && allowedColumns.includes(key)
+          (key) =>
+            updateData[key] !== undefined && allowedColumns.includes(key),
         );
 
         if (updateKeys.length === 0) {
@@ -251,7 +256,7 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
         const [updated] = await sql`
           UPDATE "custommer"
           SET ${sql(updateData, ...updateKeys)}
-          WHERE custommer_id = ${id}
+          WHERE es_code = ${es_code} AND customer_id = ${customer_id}
           RETURNING *
         `;
 
@@ -262,10 +267,12 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
     },
     {
       params: t.Object({
-        id: t.Numeric(),
+        es_code: t.String(),
+        customer_id: t.String(),
       }),
       body: t.Object({
         es_code: t.Optional(t.String({ minLength: 1 })),
+        customer_id: t.Optional(t.String({ minLength: 1 })),
         document_type_code: t.Optional(t.String({ minLength: 1 })),
         tax_id_type: t.Optional(t.String({ minLength: 1 })),
         national_id: t.Optional(t.Nullable(t.String())),
@@ -289,9 +296,10 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
       }),
       detail: {
         tags: ["Customer"],
-        summary: "แก้ไขข้อมูลลูกค้าบางส่วนด้วย ID (Patch customer)",
+        summary:
+          "แก้ไขข้อมูลลูกค้าบางส่วนด้วย es_code และ customer_id (Patch customer)",
       },
-    }
+    },
   )
 
   // 6. Delete customer by ID
@@ -305,7 +313,10 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
         if (!deleted) {
           return { success: false, error: "ไม่พบข้อมูลลูกค้าที่ต้องการลบ" };
         }
-        return { success: true, message: `ลบข้อมูลลูกค้า ID ${id} เรียบร้อยแล้ว` };
+        return {
+          success: true,
+          message: `ลบข้อมูลลูกค้า ID ${id} เรียบร้อยแล้ว`,
+        };
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -318,5 +329,5 @@ export const custommerRoutes = new Elysia({ prefix: "/custommer" })
         tags: ["Customer"],
         summary: "ลบข้อมูลลูกค้าด้วย ID (Delete customer)",
       },
-    }
+    },
   );
