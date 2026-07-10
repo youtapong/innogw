@@ -11,7 +11,9 @@ import { orderItemsRoutes } from "./routes/order_items";
 import { productMappingRoutes } from "./routes/product_mapping";
 import { spatialRefSysRoutes } from "./routes/spatial_ref_sys";
 import { devRoutes } from "./routes/dev";
+import { prodRoutes } from "./routes/prod";
 import { devNotificationRoutes } from "./routes/dev-notification";
+import { prodNotificationRoutes } from "./routes/prod-notification";
 import { transactionRoutes } from "./routes/transaction-orderRef";
 import { transactionActionRoutes } from "./routes/transaction-action";
 
@@ -49,7 +51,9 @@ const app = new Elysia()
   .use(ssoRoutes)
   // 3. โหลด Public Payment Gateway Routes (ไม่ต้องผ่าน Auth)
   .use(devRoutes)
+  .use(prodRoutes)
   .use(devNotificationRoutes)
+  .use(prodNotificationRoutes)
   .use(transactionRoutes)
   .use(transactionActionRoutes)
   // 4. โหลด Authentication Plugin (สิทธิ์เข้าใช้งานสำหรับทุก Route ด้านล่างนี้)
