@@ -19,6 +19,26 @@ export const transactionActionRoutes = new Elysia({
         ? (body as any).payment_type
         : 0;
 
+    const isProd = paymentType === 1 || paymentType === "1";
+    const eserviceKey = isProd
+      ? process.env.prod_key || ""
+      : process.env.dev_key || "";
+    const txKey = isProd
+      ? process.env.prod_txkey || ""
+      : process.env.dev_txkey || "";
+    const eserviceUrl = isProd
+      ? process.env.prod_url || ""
+      : process.env.dev_url || "";
+    const authContact = isProd
+      ? process.env.prod_authContact || ""
+      : process.env.dev_authContact || "";
+    const authCode = isProd
+      ? process.env.prod_authCode || ""
+      : process.env.dev_authCode || "";
+    const messageToken = isProd
+      ? process.env.prod_messageToken || ""
+      : process.env.dev_messsageToken || "";
+
     // console.log(
 //       `[transaction-action] Starting processing for orderRef: ${orderRef}, payment_type: ${paymentType}`,
 //     );
@@ -114,10 +134,6 @@ export const transactionActionRoutes = new Elysia({
 
       // 4. หาค่า "signature" จาก function @utils/crypto.ts
       // console.log(`[transaction-action] Step 4: Generating signature...`);
-      const txKey =
-        paymentType === 1 || paymentType === "1"
-          ? process.env.prod_txkey || process.env.PROD_TXKEY || ""
-          : process.env.dev_txkey || process.env.DEV_TXKEY || "";
       const calculatedSignature = signature(
         txKey,
         orderRef,
@@ -264,14 +280,6 @@ export const transactionActionRoutes = new Elysia({
       // console.log(
 //         `[transaction-action] Step 8: Preparing fetch payload for NT-Eservice...`,
 //       );
-      const eserviceUrl =
-        paymentType === 1 || paymentType === "1"
-          ? process.env.prod_url || process.env.PROD_URL || ""
-          : process.env.dev_url || process.env.DEV_URL || "";
-      const eserviceKey =
-        paymentType === 1 || paymentType === "1"
-          ? process.env.prod_key || process.env.PROD_KEY || ""
-          : process.env.dev_key || process.env.DEV_KEY || "";
       const fetchUrl = `${eserviceUrl}/payments/otcpay/innovation`;
 
       const eservicePayload = {
