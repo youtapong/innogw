@@ -3,7 +3,7 @@ import { sql } from "../db";
 import { product_token_encode } from "../utils/crypto";
 
 export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
-  // 1. Get all product mappings
+  // 1. Get all
   .get(
     "/",
     async () => {
@@ -19,12 +19,13 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
     {
       detail: {
         tags: ["Product Mapping"],
-        summary: "ดึงข้อมูลการจับคู่ผลิตภัณฑ์ทั้งหมด (Get all product mappings)",
+        summary:
+          "ดึงข้อมูลการจับคู่ผลิตภัณฑ์ทั้งหมด (Get all product mappings)",
       },
-    }
+    },
   )
 
-  // 2. Get product mapping by ID
+  // 2. Get by ID
   .get(
     "/:id",
     async ({ params: { id } }) => {
@@ -46,9 +47,10 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
       }),
       detail: {
         tags: ["Product Mapping"],
-        summary: "ดึงข้อมูลการจับคู่ผลิตภัณฑ์ด้วย ID (Get product mapping by ID)",
+        summary:
+          "ค้นหาข้อมูลการจับคู่ผลิตภัณฑ์ด้วย ID (Get product mapping by ID)",
       },
-    }
+    },
   )
 
   // 3. Create a new product mapping
@@ -72,10 +74,15 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
           "ecc_product_name",
           "channel_product_code",
           "channel_service_code",
-          "product_token"
+          "product_token",
+          "message_url",
+          "bank_url",
+          "inno_sub1",
+          "inno_sub2",
         ];
         const insertKeys = Object.keys(insertData).filter(
-          (key) => insertData[key] !== undefined && allowedColumns.includes(key)
+          (key) =>
+            insertData[key] !== undefined && allowedColumns.includes(key),
         );
 
         const [newMapping] = await sql`
@@ -90,24 +97,48 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
     },
     {
       body: t.Object({
-        es_code: t.String({ minLength: 1 }),
-        product_name: t.String({ minLength: 1 }),
-        hana_account_code: t.Optional(t.String()),
-        hana_product_code: t.Optional(t.String()),
-        hana_sub_product_code: t.Optional(t.String()),
-        hana_revenue_type: t.Optional(t.String()),
-        ecc_account_code: t.Optional(t.String()),
-        ecc_account_name: t.Optional(t.String()),
-        ecc_product_code: t.Optional(t.String()),
-        ecc_product_name: t.Optional(t.String()),
-        channel_product_code: t.Optional(t.String()),
-        channel_service_code: t.String({ minLength: 1 }),
+        es_code: t.String({
+          minLength: 1,
+          default: "INNS1xxxx",
+        }),
+        product_name: t.String({ minLength: 1, default: "ชื่อโครงการ" }),
+        hana_account_code: t.Optional(t.String({ default: "4410xxx" })),
+        hana_product_code: t.Optional(t.String({ default: "2090xxxx" })),
+        hana_sub_product_code: t.Optional(t.String({ default: "xx" })),
+        hana_revenue_type: t.Optional(t.String({ default: "x" })),
+        ecc_account_code: t.Optional(t.String({ default: "5041xxxx" })),
+        ecc_account_name: t.Optional(
+          t.String({ default: "รายได้บริการด้านนวัตกรรม" }),
+        ),
+        ecc_product_code: t.Optional(t.String({ default: "G0xxx" })),
+        ecc_product_name: t.Optional(
+          t.String({ default: "บริการด้านวิจัยและนวัตกรรม" }),
+        ),
+        channel_product_code: t.Optional(t.String({ default: "SPC6xxx" })),
+        channel_service_code: t.String({ minLength: 1, default: "SVC5xxx" }),
+        message_url: t.Optional(
+          t.Nullable(
+            t.String({
+              default: "https://xxxx.ntplc.co.th/api_support/xxxx_message/",
+            }),
+          ),
+        ),
+        bank_url: t.Optional(
+          t.Nullable(
+            t.String({
+              default:
+                "https://xxxx.ntplc.co.th/api_support/xxxx_bank_response/",
+            }),
+          ),
+        ),
+        inno_sub1: t.Optional(t.Nullable(t.Integer({ default: 1 }))),
+        inno_sub2: t.Optional(t.Nullable(t.Integer({ default: 1 }))),
       }),
       detail: {
         tags: ["Product Mapping"],
         summary: "สร้างข้อมูลการจับคู่ผลิตภัณฑ์ใหม่ (Create product mapping)",
       },
-    }
+    },
   )
 
   // 4. Update product mapping by ID (PUT - Full Update)
@@ -115,7 +146,8 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
     "/:id",
     async ({ params: { id }, body }) => {
       try {
-        const [existing] = await sql`SELECT id FROM "product_mapping" WHERE id = ${id}`;
+        const [existing] =
+          await sql`SELECT id FROM "product_mapping" WHERE id = ${id}`;
         if (!existing) {
           return { success: false, error: "ไม่พบข้อมูลที่ต้องการอัปเดต" };
         }
@@ -125,18 +157,23 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
         const updateData = {
           es_code: body.es_code,
           product_name: body.product_name,
-          hana_account_code: body.hana_account_code ?? '44100101',
-          hana_product_code: body.hana_product_code ?? '209020001',
-          hana_sub_product_code: body.hana_sub_product_code ?? '0',
-          hana_revenue_type: body.hana_revenue_type ?? '2',
-          ecc_account_code: body.ecc_account_code ?? '50412000',
-          ecc_account_name: body.ecc_account_name ?? 'รายได้บริการด้านนวัตกรรม',
-          ecc_product_code: body.ecc_product_code ?? 'G030xx',
-          ecc_product_name: body.ecc_product_name ?? 'บริการด้านวิจัยและนวัตกรรม',
-          channel_product_code: body.channel_product_code ?? 'SPC60001',
+          hana_account_code: body.hana_account_code ?? "44100101",
+          hana_product_code: body.hana_product_code ?? "209020001",
+          hana_sub_product_code: body.hana_sub_product_code ?? "0",
+          hana_revenue_type: body.hana_revenue_type ?? "2",
+          ecc_account_code: body.ecc_account_code ?? "50412000",
+          ecc_account_name: body.ecc_account_name ?? "รายได้บริการด้านนวัตกรรม",
+          ecc_product_code: body.ecc_product_code ?? "G030xx",
+          ecc_product_name:
+            body.ecc_product_name ?? "บริการด้านวิจัยและนวัตกรรม",
+          channel_product_code: body.channel_product_code ?? "SPC60001",
           channel_service_code: body.channel_service_code,
           product_token: token,
-          modify_time: new Date()
+          message_url: body.message_url ?? null,
+          bank_url: body.bank_url ?? null,
+          inno_sub1: body.inno_sub1 ?? null,
+          inno_sub2: body.inno_sub2 ?? null,
+          modify_time: new Date(),
         };
 
         const [updated] = await sql`
@@ -168,12 +205,17 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
         ecc_product_name: t.Optional(t.Nullable(t.String())),
         channel_product_code: t.Optional(t.Nullable(t.String())),
         channel_service_code: t.String({ minLength: 1 }),
+        message_url: t.Optional(t.Nullable(t.String())),
+        bank_url: t.Optional(t.Nullable(t.String())),
+        inno_sub1: t.Optional(t.Nullable(t.Integer())),
+        inno_sub2: t.Optional(t.Nullable(t.Integer())),
       }),
       detail: {
         tags: ["Product Mapping"],
-        summary: "อัปเดตข้อมูลการจับคู่ผลิตภัณฑ์ทั้งหมดด้วย ID (Put product mapping)",
+        summary:
+          "อัปเดตข้อมูลการจับคู่ผลิตภัณฑ์ทั้งหมดด้วย ID (Put product mapping)",
       },
-    }
+    },
   )
 
   // 5. Update product mapping by ID (PATCH - Partial Update)
@@ -181,7 +223,8 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
     "/:id",
     async ({ params: { id }, body }) => {
       try {
-        const [existing] = await sql`SELECT id, es_code FROM "product_mapping" WHERE id = ${id}`;
+        const [existing] =
+          await sql`SELECT id, es_code FROM "product_mapping" WHERE id = ${id}`;
         if (!existing) {
           return { success: false, error: "ไม่พบข้อมูลที่ต้องการอัปเดต" };
         }
@@ -189,7 +232,11 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
         const activeEsCode = body.es_code || existing.es_code;
         const token = product_token_encode(activeEsCode);
 
-        const updateData = { ...body, product_token: token, modify_time: new Date() };
+        const updateData = {
+          ...body,
+          product_token: token,
+          modify_time: new Date(),
+        };
         const allowedColumns = [
           "es_code",
           "product_name",
@@ -204,10 +251,15 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
           "channel_product_code",
           "channel_service_code",
           "product_token",
-          "modify_time"
+          "modify_time",
+          "message_url",
+          "bank_url",
+          "inno_sub1",
+          "inno_sub2",
         ];
         const updateKeys = Object.keys(updateData).filter(
-          (key) => updateData[key] !== undefined && allowedColumns.includes(key)
+          (key) =>
+            updateData[key] !== undefined && allowedColumns.includes(key),
         );
 
         if (updateKeys.length === 0) {
@@ -243,12 +295,17 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
         ecc_product_name: t.Optional(t.Nullable(t.String())),
         channel_product_code: t.Optional(t.Nullable(t.String())),
         channel_service_code: t.Optional(t.String({ minLength: 1 })),
+        message_url: t.Optional(t.Nullable(t.String())),
+        bank_url: t.Optional(t.Nullable(t.String())),
+        inno_sub1: t.Optional(t.Nullable(t.Integer())),
+        inno_sub2: t.Optional(t.Nullable(t.Integer())),
       }),
       detail: {
         tags: ["Product Mapping"],
-        summary: "อัปเดตข้อมูลการจับคู่ผลิตภัณฑ์บางส่วนด้วย ID (Patch product mapping)",
+        summary:
+          "อัปเดตข้อมูลการจับคู่ผลิตภัณฑ์บางส่วนด้วย ID (Patch product mapping)",
       },
-    }
+    },
   )
 
   // 6. Delete product mapping by ID
@@ -256,7 +313,8 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
     "/:id",
     async ({ params: { id } }) => {
       try {
-        const [existing] = await sql`SELECT id FROM "product_mapping" WHERE id = ${id}`;
+        const [existing] =
+          await sql`SELECT id FROM "product_mapping" WHERE id = ${id}`;
         if (!existing) {
           return { success: false, error: "ไม่พบข้อมูลที่ต้องการลบ" };
         }
@@ -265,7 +323,10 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
           DELETE FROM "product_mapping" WHERE id = ${id}
         `;
 
-        return { success: true, message: "ลบข้อมูลการจับคู่ผลิตภัณฑ์เรียบร้อยแล้ว" };
+        return {
+          success: true,
+          message: "ลบข้อมูลการจับคู่ผลิตภัณฑ์เรียบร้อยแล้ว",
+        };
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -278,5 +339,5 @@ export const productMappingRoutes = new Elysia({ prefix: "/product-mapping" })
         tags: ["Product Mapping"],
         summary: "ลบข้อมูลการจับคู่ผลิตภัณฑ์ด้วย ID (Delete product mapping)",
       },
-    }
+    },
   );
