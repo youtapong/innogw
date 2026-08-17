@@ -15,20 +15,21 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         const esCode = orderRef.split("-")[0];
         if (esCode) {
           const mappings = await sql`
-            SELECT message_url, product_token 
+            SELECT bank_url, product_token 
             FROM "product_mapping" 
             WHERE es_code = ${esCode}
           `;
 
-          if (mappings.length > 0 && mappings[0].message_url) {
-            const { message_url, product_token } = mappings[0];
-            forwardedTo = message_url;
+          if (mappings.length > 0 && mappings[0].bank_url) {
+            const { bank_url, product_token } = mappings[0];
+            forwardedTo = bank_url;
+
+            // Ensure bank_url ends with a slash before appending 'success'
+            const baseUrl = bank_url.endsWith("/") ? bank_url : `${bank_url}/`;
 
             // Build query params
             const qParams = new URLSearchParams(query as Record<string, string>).toString();
-            const redirectUrl = message_url.includes("?") 
-              ? `${message_url}&${qParams}` 
-              : `${message_url}?${qParams}`;
+            const redirectUrl = `${baseUrl}success?${qParams}`;
 
             // Forward via backend GET request with product_token
             try {
@@ -104,20 +105,21 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         const esCode = orderRef.split("-")[0];
         if (esCode) {
           const mappings = await sql`
-            SELECT message_url, product_token 
+            SELECT bank_url, product_token 
             FROM "product_mapping" 
             WHERE es_code = ${esCode}
           `;
 
-          if (mappings.length > 0 && mappings[0].message_url) {
-            const { message_url, product_token } = mappings[0];
-            forwardedTo = message_url;
+          if (mappings.length > 0 && mappings[0].bank_url) {
+            const { bank_url, product_token } = mappings[0];
+            forwardedTo = bank_url;
+
+            // Ensure bank_url ends with a slash before appending 'fail'
+            const baseUrl = bank_url.endsWith("/") ? bank_url : `${bank_url}/`;
 
             // Build query params
             const qParams = new URLSearchParams(query as Record<string, string>).toString();
-            const redirectUrl = message_url.includes("?") 
-              ? `${message_url}&${qParams}` 
-              : `${message_url}?${qParams}`;
+            const redirectUrl = `${baseUrl}fail?${qParams}`;
 
             // Forward via backend GET request with product_token
             try {
@@ -164,20 +166,21 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
         const esCode = orderRef.split("-")[0];
         if (esCode) {
           const mappings = await sql`
-            SELECT message_url, product_token 
+            SELECT bank_url, product_token 
             FROM "product_mapping" 
             WHERE es_code = ${esCode}
           `;
 
-          if (mappings.length > 0 && mappings[0].message_url) {
-            const { message_url, product_token } = mappings[0];
-            forwardedTo = message_url;
+          if (mappings.length > 0 && mappings[0].bank_url) {
+            const { bank_url, product_token } = mappings[0];
+            forwardedTo = bank_url;
+
+            // Ensure bank_url ends with a slash before appending 'cancel'
+            const baseUrl = bank_url.endsWith("/") ? bank_url : `${bank_url}/`;
 
             // Build query params
             const qParams = new URLSearchParams(query as Record<string, string>).toString();
-            const redirectUrl = message_url.includes("?") 
-              ? `${message_url}&${qParams}` 
-              : `${message_url}?${qParams}`;
+            const redirectUrl = `${baseUrl}cancel?${qParams}`;
 
             // Forward via backend GET request with product_token
             try {
