@@ -59,8 +59,7 @@ export const prodRoutes = new Elysia({ prefix: "/api/prod" })
             }
 
             // Redirect the client browser
-            set.redirect = redirectUrl;
-            return;
+            return Response.redirect(redirectUrl, 302);
           }
         }
       }
@@ -130,8 +129,7 @@ export const prodRoutes = new Elysia({ prefix: "/api/prod" })
             });
 
             // Redirect the client browser
-            set.redirect = redirectUrl;
-            return;
+            return Response.redirect(redirectUrl, 302);
           }
         }
       }
@@ -189,8 +187,7 @@ export const prodRoutes = new Elysia({ prefix: "/api/prod" })
             });
 
             // Redirect the client browser
-            set.redirect = redirectUrl;
-            return;
+            return Response.redirect(redirectUrl, 302);
           }
         }
       }

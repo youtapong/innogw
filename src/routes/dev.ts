@@ -60,8 +60,7 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
 
             // Redirect the client browser
             console.log(`[dev-success] Redirecting browser to: ${redirectUrl}`);
-            set.redirect = redirectUrl;
-            return;
+            return Response.redirect(redirectUrl, 302);
           }
         }
       }
@@ -132,8 +131,7 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
 
             // Redirect the client browser
             console.log(`[dev-fail] Redirecting browser to: ${redirectUrl}`);
-            set.redirect = redirectUrl;
-            return;
+            return Response.redirect(redirectUrl, 302);
           }
         }
       }
@@ -192,8 +190,7 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
 
             // Redirect the client browser
             console.log(`[dev-cancel] Redirecting browser to: ${redirectUrl}`);
-            set.redirect = redirectUrl;
-            return;
+            return Response.redirect(redirectUrl, 302);
           }
         }
       }
