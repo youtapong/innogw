@@ -31,17 +31,15 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
             const qParams = new URLSearchParams(query as Record<string, string>).toString();
             const redirectUrl = `${baseUrl}success?${qParams}`;
 
-            // Forward via backend GET request with product_token
-            try {
-              await fetch(redirectUrl, {
-                method: "GET",
-                headers: {
-                  Authorization: `Bearer ${product_token || ""}`,
-                },
-              });
-            } catch (err: any) {
+            // Forward via backend GET request with product_token (non-blocking)
+            fetch(redirectUrl, {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${product_token || ""}`,
+              },
+            }).catch((err: any) => {
               console.error("Failed to forward GET callback:", err.message);
-            }
+            });
 
             const responseBody = {
               status: "redirect",
@@ -122,17 +120,15 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
             const qParams = new URLSearchParams(query as Record<string, string>).toString();
             const redirectUrl = `${baseUrl}fail?${qParams}`;
 
-            // Forward via backend GET request with product_token
-            try {
-              await fetch(redirectUrl, {
-                method: "GET",
-                headers: {
-                  Authorization: `Bearer ${product_token || ""}`,
-                },
-              });
-            } catch (err: any) {
+            // Forward via backend GET request with product_token (non-blocking)
+            fetch(redirectUrl, {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${product_token || ""}`,
+              },
+            }).catch((err: any) => {
               console.error("Failed to forward GET callback:", err.message);
-            }
+            });
 
             // Redirect the client browser
             console.log(`[dev-fail] Redirecting browser to: ${redirectUrl}`);
@@ -184,17 +180,15 @@ export const devRoutes = new Elysia({ prefix: "/api/dev" })
             const qParams = new URLSearchParams(query as Record<string, string>).toString();
             const redirectUrl = `${baseUrl}cancel?${qParams}`;
 
-            // Forward via backend GET request with product_token
-            try {
-              await fetch(redirectUrl, {
-                method: "GET",
-                headers: {
-                  Authorization: `Bearer ${product_token || ""}`,
-                },
-              });
-            } catch (err: any) {
+            // Forward via backend GET request with product_token (non-blocking)
+            fetch(redirectUrl, {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${product_token || ""}`,
+              },
+            }).catch((err: any) => {
               console.error("Failed to forward GET callback:", err.message);
-            }
+            });
 
             // Redirect the client browser
             console.log(`[dev-cancel] Redirecting browser to: ${redirectUrl}`);
